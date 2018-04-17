@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "insertdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -8,51 +8,72 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->tableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
-	std::string params[4];
-	std::ifstream ini;
-	ini.open("connect.ini");
-	if(ini.is_open())
-	{
-		for(uint8_t i=0;i<4;i++)
-			ini>>params[i];
-		ini.close();
+	tableEditor=new TableEditor(*ui->tableWidget);
 
-	}
-	client=new MySQLClient(params[0].c_str(), params[1].c_str(), params[2].c_str(), params[3].c_str());
-	client->connect();
-
+	connect(this, SIGNAL(executeQuery(QString*)), tableEditor, SLOT(executeQuery(QString*)));
 }
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_pbRunSQL_clicked()
 {
-	std::vector<std::string> *res=new std::vector<std::string>();
-	QString query=ui->lineEdit->text().toUtf8();
-	client->executeQuery(query.toAscii(), *res);
-
-	if(query.split(" ")[0]=="SELECT")
-		this->reloadTable(res);
-
-	delete res;
+	QString query=ui->lineEdit->text();
+	emit(executeQuery(&query));
 }
 
-void MainWindow::reloadTable(std::vector<std::string> *vec)
+void MainWindow::on_pbAdd_clicked()
 {
-	ui->tableWidget->setRowCount(vec->size());
-	for(uint16_t i=0;i<vec->size();i++)
+	InsertDialog *dialog=new InsertDialog();
+	QStringList res;
+	if(dialog->exec())
 	{
-		QString str=QString::fromStdString(vec->at(i));
-		str=str.fromUtf8(str.toAscii());
-		QStringList row=str.split("|");
-		if(ui->tableWidget->colorCount()!=row.size())
-			ui->tableWidget->setColumnCount(row.size());
-		for(uint8_t j=0;j<row.size();j++)
-			ui->tableWidget->setItem(i,j,new QTableWidgetItem(row.at(j)));
+		res=dialog->returnParams();
+		QStringList colNames;
+		//сверху лежит название таблицы, поэтому начинаем тут с одного
+		for(uint8_t i=1;i<res.size();i++)
+			colNames.append(res.at(i).split("|")[0]);
+		QString query;
+		switch(res.at(0).toInt())
+		{
+		case 0:
+			query="INSERT INTO expenses(";
+			for(uint8_t i=0;i<colNames.size();i++)
+				if(i!=colNames.size()-1)
+					query.append(colNames.at(i)+", ");
+				else
+					query.append(colNames.at(i)+") VALUES(");
+			for(uint8_t i=1;i<res.size();i++)
+				if(i!=res.size()-1)
+					query.append(res.at(i).split("|")[1]+", ");
+				else
+					query.append(res.at(i).split("|")[1]+")");
+			break;
+		case 1:
+			break;
+		case 2:
+			query="INSERT INTO shops(name) VALUES("+res.at(1).split("|")[1]+")";
+			break;
+		}
+		std::vector<std::string> *vec=new std::vector<std::string>();
+		MySQLClient *client;
+		std::string params[4];
+		std::ifstream ini;
+		ini.open("connect.ini");
+		if(ini.is_open())
+		{
+			for(uint8_t i=0;i<4;i++)
+				ini>>params[i];
+			client=new MySQLClient(params[0].c_str(), params[1].c_str(), params[2].c_str(), params[3].c_str());
+			client->connect();
+			client->executeQuery(query.toUtf8(), *vec);
+			client->closeConnection();
+
+		}
+		delete vec;
+
 	}
-//это растягивает столбец чтобы отображался весь контент
-	ui->tableWidget->resizeColumnsToContents();
+	delete dialog;
 }
 
 MainWindow::~MainWindow()
 {
-	delete client;
+	delete tableEditor;
 	delete ui;
 }

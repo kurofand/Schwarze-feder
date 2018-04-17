@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "mysqlClient.hpp"
+#include "tableeditor.h"
+class TableEditor;
 namespace Ui {
 class MainWindow;
 }
@@ -17,11 +18,16 @@ public:
 
 private:
 	Ui::MainWindow *ui;
-	MySQLClient *client;
-	void reloadTable(std::vector<std::string>* vec);
+	//MySQLClient *client;
+	TableEditor *tableEditor;
+	//void reloadTable(std::vector<std::string>* vec);
 
 private slots:
-	void on_pushButton_clicked();
+	void on_pbRunSQL_clicked();
+	void on_pbAdd_clicked();
+
+signals:
+	void executeQuery(QString *query);
 };
 
 #endif // MAINWINDOW_H

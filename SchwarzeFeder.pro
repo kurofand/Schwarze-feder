@@ -29,11 +29,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    mysqlClient.cpp
+    mysqlClient.cpp \
+    tableeditor.cpp \
+    insertdialog.cpp
 
 HEADERS += \
         mainwindow.h \
-    mysqlClient.hpp
+    mysqlClient.hpp \
+    tableeditor.h \
+    insertdialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    insertdialog.ui
