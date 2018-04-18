@@ -16,11 +16,15 @@ public:
 private:
 	QTableWidget *table;
 	MySQLClient *client;
-	QString currentQuery;
+	QString currentQuery="SELECT expenses.name, val, date, descr, categories.name, shops.name "
+						 "FROM expenses INNER JOIN categories, shops "
+						 "WHERE categoryId=categories.id "
+						 "AND shopId=shops.id";
 	void reloadTable(std::vector<std::string> *vec);
 
 public slots:
 	void executeQuery(QString *query);
+	void refreshTable();
 };
 
 #endif // TABLEEDITOR_H

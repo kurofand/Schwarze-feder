@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "insertdialog.h"
+#include "selectdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -11,11 +12,23 @@ MainWindow::MainWindow(QWidget *parent) :
 	tableEditor=new TableEditor(*ui->tableWidget);
 
 	connect(this, SIGNAL(executeQuery(QString*)), tableEditor, SLOT(executeQuery(QString*)));
+	connect(ui->pbRefresh, SIGNAL(clicked(bool)), tableEditor, SLOT(refreshTable()));
 }
 void MainWindow::on_pbRunSQL_clicked()
 {
 	QString query=ui->lineEdit->text();
 	emit(executeQuery(&query));
+}
+
+void MainWindow::on_pbSelect_clicked()
+{
+	SelectDialog *dialog=new SelectDialog();
+	QStringList res;
+	if(dialog->exec())
+	{
+		res=dialog->returnParams();
+	}
+	delete dialog;
 }
 
 void MainWindow::on_pbAdd_clicked()
@@ -46,9 +59,23 @@ void MainWindow::on_pbAdd_clicked()
 					query.append(res.at(i).split("|")[1]+")");
 			break;
 		case 1:
+			query="INSERT INTO categories(name, shopAvailable) VALUES(";
+			for(uint8_t i=1;i<res.size();i++)
+				if(i!=res.size()-1)
+					query.append(res.at(i).split("|")[1]+", ");
+				else
+					query.append(res.at(i).split("|")[1]+")");
 			break;
 		case 2:
 			query="INSERT INTO shops(name) VALUES("+res.at(1).split("|")[1]+")";
+			break;
+		case 3:
+			query="INSERT INTO currency(name, ind, mainFlag) VALUES(";
+			for(uint8_t i=1;i<res.size();i++)
+				if(i!=res.size()-1)
+					query.append(res.at(i).split("|")[1]+", ");
+				else
+					query.append(res.at(i).split("|")[1]+")");
 			break;
 		}
 		std::vector<std::string> *vec=new std::vector<std::string>();

@@ -45,6 +45,13 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
+           <widget class="QPushButton" name="pbRefresh">
+            <property name="text">
+             <string>Refresh</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pbAdd">
             <property name="text">
              <string>Add</string>
@@ -52,9 +59,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="pbSelect">
             <property name="text">
-             <string>PushButton</string>
+             <string>Select table</string>
             </property>
            </widget>
           </item>

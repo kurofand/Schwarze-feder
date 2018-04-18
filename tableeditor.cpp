@@ -41,12 +41,19 @@ void TableEditor::reloadTable(std::vector<std::string> *vec)
 void TableEditor::executeQuery(QString *query)
 {
 	std::vector<std::string> *vec=new std::vector<std::string>();
-	client->executeQuery(query->toAscii(), *vec);
-
-	if(query->split(" ")[0]=="SELECT")
-		reloadTable(vec);
-
+	bool res=client->executeQuery(query->toAscii(), *vec);
+	if(res)
+	{
+		currentQuery=*query;
+		if(query->split(" ")[0]=="SELECT")
+			reloadTable(vec);
+	}
 	delete vec;
+}
+
+void TableEditor::refreshTable()
+{
+	this->executeQuery(&currentQuery);
 }
 
 TableEditor::~TableEditor()

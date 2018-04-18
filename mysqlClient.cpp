@@ -54,10 +54,9 @@ bool MySQLClient::connect()
 	}
 }
 
-void MySQLClient::executeQuery(const char* query, std::vector<std::string>& resVec)
+bool MySQLClient::executeQuery(const char* query, std::vector<std::string>& resVec)
 {
 	sql::Statement *stmt;
-	sql::ResultSet *stmtRes;
 	stmt=this->con->createStatement();
 	std::string queryType;
 	uint8_t i=0;
@@ -66,7 +65,14 @@ void MySQLClient::executeQuery(const char* query, std::vector<std::string>& resV
 	if(queryType=="SELECT")
 	{
 		sql::ResultSet *stmtRes;
+		try{
 		stmtRes=stmt->executeQuery(query);
+		}
+		catch(sql::SQLException)
+		{
+			delete stmt;
+			return false;
+		}
 		while(stmtRes->next())
 		{
 			i=0;
@@ -89,6 +95,7 @@ void MySQLClient::executeQuery(const char* query, std::vector<std::string>& resV
 		stmt->execute(query);
 
 	delete stmt;
+	return true;
 }
 
 void MySQLClient::closeConnection()
