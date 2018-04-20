@@ -20,6 +20,9 @@ public:
 private:
 	Ui::SelectDialog *ui;
 	QCheckBox *boxes[6];
+	//похоже что в момент нажатия кнопки "ок" комбобоксы перестают отрисовываться
+	//и поэтому я схораняю значения видимости в булевский массив
+	bool boxVis[6];
 	void showBoxes(uint8_t boxCount);
 private slots:
 	void tableSelected(int index);

@@ -10,8 +10,9 @@ SelectDialog::SelectDialog(QWidget *parent) :
 	{
 		boxes[i]=new QCheckBox();
 		ui->vlElements->addWidget(boxes[i]);
-		//boxes[i]->hide();
-		boxes[i]->setVisible(false);
+		boxes[i]->hide();
+		boxVis[i]=boxes[i]->isVisible();
+
 	}
 
 	connect(ui->cbTables, SIGNAL(currentIndexChanged(int)), this, SLOT(tableSelected(int)));
@@ -21,16 +22,20 @@ SelectDialog::SelectDialog(QWidget *parent) :
 void SelectDialog::showBoxes(uint8_t boxCount)
 {
 	for(uint8_t i=0;i<boxCount;i++)
-		//boxes[i]->show();
-		boxes[i]->setVisible(true);
+	{
+		boxes[i]->show();
+		boxVis[i]=boxes[i]->isVisible();
+	}
 }
 
 void SelectDialog::tableSelected(int index)
 {
 
 	for(uint8_t i=0;i<6;i++)
-		//boxes[i]->hide();
-		boxes[i]->setVisible(false);
+	{
+		boxes[i]->hide();
+		boxVis[i]=boxes[i]->isVisible();
+	}
 	switch(index)
 	{
 	case 0:
@@ -81,8 +86,10 @@ QStringList SelectDialog::returnParams()
 	QStringList res;
 	res.append(QString::number(ui->cbTables->currentIndex()));
 	for(uint8_t i=0;i<6;i++)
-		if(boxes[i]->isVisible())
+	{
+		if(boxVis[i])
 			res.append(QString::fromAscii(boxes[i]->checkState()==0?"0":"1"));
+	}
 	return res;
 }
 

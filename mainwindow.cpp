@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "insertdialog.h"
 #include "selectdialog.h"
+#include "filterdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -95,6 +96,17 @@ void MainWindow::on_pbAdd_clicked()
 		}
 		delete vec;
 
+	}
+	delete dialog;
+}
+
+void MainWindow::on_pbFilter_clicked()
+{
+	FilterDialog *dialog=new FilterDialog();
+	if(dialog->exec())
+	{
+		QString filterQuery=dialog->returnFilterString();
+		filterQuery=filterQuery.toUtf8();
 	}
 	delete dialog;
 }

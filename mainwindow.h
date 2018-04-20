@@ -26,6 +26,7 @@ private slots:
 	void on_pbRunSQL_clicked();
 	void on_pbAdd_clicked();
 	void on_pbSelect_clicked();
+	void on_pbFilter_clicked();
 
 signals:
 	void executeQuery(QString *query);

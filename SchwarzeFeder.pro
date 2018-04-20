@@ -32,16 +32,19 @@ SOURCES += \
     mysqlClient.cpp \
     tableeditor.cpp \
     insertdialog.cpp \
-    selectdialog.cpp
+    selectdialog.cpp \
+    filterdialog.cpp
 
 HEADERS += \
         mainwindow.h \
     mysqlClient.hpp \
     tableeditor.h \
     insertdialog.h \
-    selectdialog.h
+    selectdialog.h \
+    filterdialog.h
 
 FORMS += \
         mainwindow.ui \
     insertdialog.ui \
-    selectdialog.ui
+    selectdialog.ui \
+    filterdialog.ui

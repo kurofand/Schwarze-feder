@@ -65,6 +65,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="pbFilter">
+            <property name="text">
+             <string>Show filter</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
