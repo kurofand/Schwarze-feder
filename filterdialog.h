@@ -27,8 +27,7 @@ public:
 private:
 	Ui::FilterDialog *ui;
 	QList<QVBoxLayout *> filterLayouts;
-	QList<QComboBox *> cbCols;
-	QList<QComboBox *> cbCombo;
+	QList<QComboBox *> cbCols, cbCombo;
 	QList<QPushButton *> pbDeletes;
 	QList<QFormLayout *> innerLayouts;
 	QList<QLabel *> lFilterCaptions;

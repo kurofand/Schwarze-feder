@@ -3,6 +3,7 @@
 #include "insertdialog.h"
 #include "selectdialog.h"
 #include "filterdialog.h"
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -14,10 +15,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(this, SIGNAL(executeQuery(QString*)), tableEditor, SLOT(executeQuery(QString*)));
 	connect(ui->pbRefresh, SIGNAL(clicked(bool)), tableEditor, SLOT(refreshTable()));
+	connect(tableEditor, SIGNAL(buttonEnabled(uint8_t)), this, SLOT(buttonEnabled(uint8_t)));
 }
 void MainWindow::on_pbRunSQL_clicked()
 {
 	QString query=ui->lineEdit->text();
+	query=query.toUtf8();
 	emit(executeQuery(&query));
 }
 
@@ -25,10 +28,76 @@ void MainWindow::on_pbSelect_clicked()
 {
 	SelectDialog *dialog=new SelectDialog();
 	QStringList res;
+	QString str="SELECT # FROM ##";
 	if(dialog->exec())
 	{
 		res=dialog->returnParams();
+
+		switch(res.at(0).toInt())
+		{
+		case 0:
+		{
+			str.replace(QString("##"), QString("expenses INNER JOIN categories, shops WHERE categories.id=categoryId AND shops.id=shopId"));
+			QString cols[]={"expenses.name", "val", "descr" , "date", "categories.name", "shops.name"};
+			QString colsstr;
+			for(uint8_t i=0;i<6;i++)
+				if(res.at(i+1)=="1")
+					colsstr.append(cols[i]+", ");
+			uint8_t pos=colsstr.lastIndexOf(",");
+			colsstr=colsstr.left(pos);
+			str.replace(QString("#"), colsstr);
+			break;
+		}
+		case 1:
+		{
+			str.replace(QString("##"), QString("expenses"));
+			QString cols[]={"name", "val", "descr", "date"};
+			QString colsstr;
+			for(uint8_t i=0;i<4;i++)
+				if(res.at(i+1)=="1")
+					colsstr.append(cols[i]+", ");
+			uint8_t pos=colsstr.lastIndexOf(",");
+			colsstr=colsstr.left(pos);
+			str.replace(QString("#"), colsstr);
+			break;
+		}
+		case 2:
+		{
+			str.replace(QString("##"), QString("categories"));
+			QString cols[]={"name", "shopAvailable"};
+			QString colsstr;
+			for(uint8_t i=0;i<2;i++)
+				if(res.at(i+1)=="1")
+					colsstr.append(cols[i]+", ");
+			uint8_t pos=colsstr.lastIndexOf(",");
+			colsstr=colsstr.left(pos);
+			str.replace(QString("#"), colsstr);
+			break;
+		}
+		case 3:
+		{
+			str.replace(QString("##"), QString("shops"));
+			if(res.at(1)=="1")
+				str.replace(QString("#"), QString("name"));
+			break;
+		}
+		case 4:
+		{
+			str.replace(QString("##"), QString("currency"));
+			QString cols[]={"name", "ind", "mainFlag"};
+			QString colsstr;
+			for(uint8_t i=0;i<3;i++)
+				if(res.at(i+1)=="1")
+					colsstr.append(cols[i]+", ");
+			uint8_t pos=colsstr.lastIndexOf(",");
+			colsstr=colsstr.left(pos);
+			str.replace(QString("#"), colsstr);
+			break;
+		}
+		}
 	}
+	str=str.toUtf8();
+	emit(executeQuery(&str));
 	delete dialog;
 }
 
@@ -106,9 +175,30 @@ void MainWindow::on_pbFilter_clicked()
 	if(dialog->exec())
 	{
 		QString filterQuery=dialog->returnFilterString();
-		filterQuery=filterQuery.toUtf8();
+		QString query="SELECT expenses.name, descr, val, date, "
+					  "categories.name, shops.name "
+					  "FROM expenses INNER JOIN categories, shops "
+					  "WHERE shopId=shops.id AND categories.id=categoryId AND ("+filterQuery+ ")";
+		query=query.toUtf8();
+		emit(executeQuery(&query));
 	}
 	delete dialog;
+}
+
+void MainWindow::buttonEnabled(uint8_t ind)
+{
+	switch(ind)
+	{
+	//all disabled
+	case 0:
+	{
+		ui->pbAdd->setEnabled(false);
+		ui->pbFilter->setEnabled(false);
+		ui->pbRefresh->setEnabled(false);
+		ui->pbRunSQL->setEnabled(false);
+		ui->pbSelect->setEnabled(false);
+	}
+	}
 }
 
 MainWindow::~MainWindow()

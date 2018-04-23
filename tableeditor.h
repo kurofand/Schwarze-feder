@@ -25,6 +25,8 @@ private:
 public slots:
 	void executeQuery(QString *query);
 	void refreshTable();
+signals:
+	void buttonEnabled(uint8_t ind);
 };
 
 #endif // TABLEEDITOR_H

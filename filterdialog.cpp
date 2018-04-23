@@ -67,8 +67,29 @@ void FilterDialog::deleteFilter()
 						pbDeletes.removeAt(j);
 				for(uint8_t j=0;j<innerLayouts.size();j++)
 					if(child->layout()==innerLayouts.at(j))
+					{
+						QLayoutItem *innerChild;
+						while((innerChild=innerLayouts.at(j)->takeAt(0))!=0)
+						{
+							for(uint8_t k=0;k<leLines.size();k++)
+								if(innerChild->widget()==leLines.at(k))
+									leLines.removeAt(k);
+							for(uint8_t k=0;k<dsbVals.size();k++)
+								if(innerChild->widget()==dsbVals.at(k))
+									dsbVals.removeAt(k);
+							for(uint8_t k=0;k<deDates.size();k++)
+								if(innerChild->widget()==deDates.at(k))
+									deDates.removeAt(k);
+							for(uint8_t k=0;k<cbCombo.size();k++)
+								if(innerChild->widget()==cbCombo.at(k))
+									cbCombo.removeAt(k);
+							delete innerChild->widget();
+							delete innerChild;
+							innerChild=nullptr;
+						}
 						innerLayouts.removeAt(j);
-				for(uint8_t j=0;j<leLines.size();j++)
+					}
+				/*for(uint8_t j=0;j<leLines.size();j++)
 					if(child->widget()==leLines.at(j))
 						leLines.removeAt(j);
 				for(uint8_t j=0;j<dsbVals.size();j++)
@@ -76,7 +97,8 @@ void FilterDialog::deleteFilter()
 						dsbVals.removeAt(j);
 				for(uint8_t j=0;j<deDates.size();j++)
 					if(child->widget()==deDates.at(j))
-						deDates.removeAt(j);
+						deDates.removeAt(j);*/
+				//кроме внутреннего есть ещё и внешний, тот где "И"/"ИЛИ"
 				for(uint8_t j=0;j<cbCombo.size();j++)
 					if(child->widget()==cbCombo.at(j))
 						cbCombo.removeAt(j);
@@ -136,6 +158,8 @@ void FilterDialog::selectCol(int index)
 QString FilterDialog::returnFilterString()
 {
 	QString res="";
+	QStringList resArr;
+	QStringList logicArr;
 	for(uint8_t i=0;i<filterLayouts.size();i++)
 	{
 		//res=res+cbCols.at(i)->currentText();
@@ -147,18 +171,23 @@ QString FilterDialog::returnFilterString()
 		case 4:
 		{
 			if(cbCols.at(i)->currentIndex()==3)
-				res=res+"categories.";
+				//res=res+"categories.";
+				resArr.append("categories.name");
 			else
 				if(cbCols.at(i)->currentIndex()==4)
-					res=res+"shops.";
-			res=res+"name";
+					//res=res+"shops.";
+					resArr.append("shops.name");
+			//res=res+"name";
+				else
+					resArr.append("expenses.name");
 			for(uint8_t j=0;j<innerLayouts.at(i)->count();j++)
 			{
 				child=innerLayouts.at(i)->takeAt(j);
 				for(uint8_t k=0;k<leLines.size();k++)
 					if(child->widget()==leLines.at(k))
 					{
-						res=res+"=\""+leLines.at(k)->text()+"\"";
+						//res=res+"=\""+leLines.at(k)->text()+"\"";
+						resArr.back().append("=\""+leLines.at(k)->text()+"\"");
 						break;
 					}
 			}
@@ -166,19 +195,22 @@ QString FilterDialog::returnFilterString()
 		}
 		case 1:
 		{
-			res=res+"val";
+			//res=res+"val";
+			resArr.append("val");
 			while((child=innerLayouts.at(i)->takeAt(0))!=0)
 			{
 				for(uint8_t j=0;j<cbCombo.size();j++)
 					if((child->widget()==cbCombo.at(j))&&(cbCombo.at(j)->property("tag")=="compare"))
 					{
-						res=res+cbCombo.at(j)->currentText();
+						//res=res+cbCombo.at(j)->currentText();
+						resArr.back().append(cbCombo.at(j)->currentText());
 						break;
 					}
 				for(uint8_t j=0;j<dsbVals.size();j++)
 					if(child->widget()==dsbVals.at(j))
 					{
-						res=res+QString::number(dsbVals.at(j)->value());
+						//res=res+QString::number(dsbVals.at(j)->value());
+						resArr.back().append(QString::number(dsbVals.at(j)->value()));
 						break;
 					}
 			}
@@ -186,20 +218,23 @@ QString FilterDialog::returnFilterString()
 		}
 		case 2:
 		{
-			res=res+"date";
+			//res=res+"date";
+			resArr.append("date");
 			while((child=innerLayouts.at(i)->takeAt(0))!=0)
 			{
 
 				for(uint8_t j=0;j<cbCombo.size();j++)
 					if((child->widget()==cbCombo.at(j))&&(cbCombo.at(j)->property("tag")=="compare"))
 					{
-						res=res+cbCombo.at(j)->currentText();
+						//res=res+cbCombo.at(j)->currentText();
+						resArr.back().append(cbCombo.at(j)->currentText());
 						break;
 					}
 				for(uint8_t j=0;j<deDates.size();j++)
 					if(child->widget()==deDates.at(j))
 					{
-						res=res+"\""+deDates.at(j)->text()+"\"";
+						//res=res+"\""+deDates.at(j)->text()+"\"";
+						resArr.back().append("\""+deDates.at(j)->text()+"\"");
 						break;
 					}
 			}
@@ -211,9 +246,13 @@ QString FilterDialog::returnFilterString()
 			child=filterLayouts.at(i)->itemAt(j);
 			for(uint8_t k=0;k<cbCombo.size();k++)
 			if((child->widget()==cbCombo.at(k))&&(cbCombo.at(k)->property("tag")=="logic"))
-				res=res+" "+cbCombo.at(k)->currentText()+" ";
+				//res=res+" "+cbCombo.at(k)->currentText()+" ";
+				logicArr.append(" "+cbCombo.at(k)->currentText()+" ");
 		}
 	}
+	res=resArr.at(0);
+	for(uint8_t i=0;i<logicArr.size();i++)
+		res=res+logicArr.at(i)+resArr.at(i+1);
 	return res;
 }
 

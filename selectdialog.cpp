@@ -70,6 +70,7 @@ void SelectDialog::tableSelected(int index)
 	{
 		showBoxes(1);
 		boxes[0]->setText("Name");
+		break;
 	}
 	case 4:
 	{

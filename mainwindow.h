@@ -27,6 +27,8 @@ private slots:
 	void on_pbAdd_clicked();
 	void on_pbSelect_clicked();
 	void on_pbFilter_clicked();
+public slots:
+	void buttonEnabled(uint8_t ind);
 
 signals:
 	void executeQuery(QString *query);

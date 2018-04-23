@@ -1,4 +1,6 @@
 #include "tableeditor.h"
+#include <QErrorMessage>
+#include <QDebug>
 
 TableEditor::TableEditor(QTableWidget &widget, QObject *parent) :
 	QObject(parent)
@@ -13,7 +15,19 @@ TableEditor::TableEditor(QTableWidget &widget, QObject *parent) :
 		ini.close();
 	}
 	client=new MySQLClient(params[0].c_str(), params[1].c_str(), params[2].c_str(), params[3].c_str());
-	client->connect();
+	if(!client->connect())
+	{
+		//QErrorMessage *errorMessage=new QErrorMessage();
+
+		//if(errorMessage->exec())
+		//errorMessage->showMessage("Connection to DB was not established!", "Connection error");
+		//delete errorMessage;
+		//QErrorMessage err();
+		//err.showMessage("Connection to DB was not established!");
+		//connect(this, SIGNAL(buttonEnabled(uint8_t)), )
+		emit(buttonEnabled(0));
+
+	}
 	table=&widget;
 }
 
@@ -27,6 +41,11 @@ void TableEditor::reloadTable(std::vector<std::string> *vec)
 	table->setRowCount(vec->size());
 	for(uint16_t i=0;i<vec->size();i++)
 	{
+		/*тут должно быть обновление названия столбцов таблицы*/
+		qDebug()<<currentQuery;
+		QStringList avHeaders={"Name", "Descriptoin", "Price", "Date", "Category", "Shop", "Shop flag", "Convert index", "Main currency flag"};
+		QStringList headers;
+		QString cols=currentQuery.replace(QString("SELECT "), QString(""));
 		QString str=QString::fromStdString(vec->at(i));
 		str=str.fromUtf8(str.toAscii());
 		QStringList row=str.split("|");
