@@ -20,6 +20,7 @@ private:
 	Ui::MainWindow *ui;
 	//MySQLClient *client;
 	TableEditor *tableEditor;
+	qint8 currentTable=-1;
 	//void reloadTable(std::vector<std::string>* vec);
 
 private slots:
@@ -32,6 +33,7 @@ public slots:
 
 signals:
 	void executeQuery(QString *query);
+	void setCurrentQuery(QString *query, uint8_t pos);
 	void refreshTable();
 };
 

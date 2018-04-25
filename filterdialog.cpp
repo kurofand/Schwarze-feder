@@ -44,11 +44,19 @@ void FilterDialog::on_pbAdd_clicked()
 		cbCols.back()->addItems(sl);
 		cbCols.back()->setCurrentIndex(-1);
 		cbCols.back()->setProperty("tag","rowName");
-		connect(cbCols.back(), SIGNAL(currentIndexChanged(int)), this, SLOT(selectCol(int)));
 
 		break;
 	}
+	case 2:
+	{
+		QStringList sl={"Name", "Shop flag"};
+		cbCols.back()->addItems(sl);
+		cbCols.back()->setCurrentIndex(-1);
+		cbCols.back()->setProperty("tag", "rowName");
+		break;
 	}
+	}
+	connect(cbCols.back(), SIGNAL(currentIndexChanged(int)), this, SLOT(selectCol(int)));
 }
 //пока так, потом править
 void FilterDialog::deleteFilter()
@@ -83,6 +91,9 @@ void FilterDialog::deleteFilter()
 							for(uint8_t k=0;k<cbCombo.size();k++)
 								if(innerChild->widget()==cbCombo.at(k))
 									cbCombo.removeAt(k);
+							for(uint8_t k=0;k<chCheck.size();k++)
+								if(innerChild->widget()==chCheck.at(k))
+									chCheck.removeAt(k);
 							delete innerChild->widget();
 							delete innerChild;
 							innerChild=nullptr;
@@ -113,45 +124,131 @@ void FilterDialog::deleteFilter()
 
 void FilterDialog::selectCol(int index)
 {
-	switch(index)
+	QComboBox *s=qobject_cast<QComboBox*>(sender());
+	uint8_t layoutIndex=0;
+	for(uint8_t i=0;i<filterLayouts.size();i++)
+	{
+		QLayoutItem *child;
+		for(uint8_t k=0;k<filterLayouts.at(i)->count();k++)
+		{
+			child=filterLayouts.at(i)->itemAt(k);
+			if(child->widget()==s)
+			{
+				layoutIndex=i;
+				if(innerLayouts.at(i)->count()>0)
+				{
+				QLayoutItem *innerChild;
+				while((innerChild=innerLayouts.at(i)->takeAt(0))!=0)
+				{
+					for(uint8_t j=0;j<leLines.size();j++)
+						if(innerChild->widget()==leLines.at(j))
+						{
+							leLines.removeAt(j);
+							break;
+						}
+					for(uint8_t j=0;j<dsbVals.size();j++)
+						if(innerChild->widget()==dsbVals.at(j))
+						{
+							dsbVals.removeAt(j);
+							break;
+						}
+					for(uint8_t j=0;j<deDates.size();j++)
+						if(innerChild->widget()==deDates.at(j))
+						{
+							deDates.removeAt(j);
+							break;
+						}
+					for(uint8_t j=0;j<cbCombo.size();j++)
+						if(innerChild->widget()==cbCombo.at(j))
+						{
+							cbCombo.removeAt(j);
+							break;
+						}
+					for(uint8_t j=0;j<chCheck.size();j++)
+						if(innerChild->widget()==chCheck.at(j))
+						{
+							chCheck.removeAt(j);
+							break;
+						}
+					delete innerChild->widget();
+					delete innerChild;
+					innerChild=nullptr;
+				}
+				}
+			}
+		}
+	}
+	switch(tIndex)
 	{
 	case 0:
-	case 3:
-	case 4:
 	{
-		leLines.append(new QLineEdit());
-		innerLayouts.back()->addWidget(leLines.back());
-		break;
-	}
-	case 1:
-	{
-		//cbCols.append(new QComboBox());
-		//cbCols.back()->setProperty("tag", "compare");
-		dsbVals.append(new QDoubleSpinBox());
-		//cbCols.back()->addItems({"<", "<=", "=", ">=", ">"});
-		cbCombo.append(new QComboBox());
-		cbCombo.back()->setProperty("tag", "compare");
-		cbCombo.back()->addItems({"<", "<=", "=", ">=", ">"});
-		innerLayouts.back()->addRow(cbCombo.back(), dsbVals.back());
-		//innerLayouts.back()->addRow(cbCols.back(), dsbVals.back());
-		dsbVals.back()->setMaximum(9999999.99);
+		switch(index)
+		{
+		case 0:
+		case 3:
+		case 4:
+		{
+			leLines.append(new QLineEdit());
+			//innerLayouts.back()->addWidget(leLines.back());
+			innerLayouts.at(layoutIndex)->addWidget(leLines.back());
+			break;
+		}
+		case 1:
+		{
+			//cbCols.append(new QComboBox());
+			//cbCols.back()->setProperty("tag", "compare");
+			dsbVals.append(new QDoubleSpinBox());
+			//cbCols.back()->addItems({"<", "<=", "=", ">=", ">"});
+			cbCombo.append(new QComboBox());
+			cbCombo.back()->setProperty("tag", "compare");
+			cbCombo.back()->addItems({"<", "<=", "=", ">=", ">"});
+			//innerLayouts.back()->addRow(cbCombo.back(), dsbVals.back());
+			innerLayouts.at(layoutIndex)->addRow(cbCombo.back(), dsbVals.back());
+			//innerLayouts.back()->addRow(cbCols.back(), dsbVals.back());
+			dsbVals.back()->setMaximum(9999999.99);
+			break;
+		}
+		case 2:
+		{
+			deDates.append(new QDateEdit());
+			deDates.back()->setDisplayFormat("yyyy-MM-dd");
+			deDates.back()->setDate(QDate::currentDate());
+			/*cbCols.append(new QComboBox());
+			cbCols.back()->setProperty("tag", "compare");
+			cbCols.back()->addItems({"<", "<=", "=", ">=", ">"});
+			innerLayouts.back()->addRow(cbCols.back(), deDates.back());*/
+			cbCombo.append(new QComboBox());
+			cbCombo.back()->setProperty("tag", "compare");
+			cbCombo.back()->addItems({"<", "<=", "=", ">=", ">"});
+			//innerLayouts.back()->addRow(cbCombo.back(), deDates.back());
+			innerLayouts.at(layoutIndex)->addRow(cbCombo.back(), deDates.back());
+			break;
+		}
+		}
 		break;
 	}
 	case 2:
 	{
-		deDates.append(new QDateEdit());
-		deDates.back()->setDisplayFormat("yyyy-MM-dd");
-		deDates.back()->setDate(QDate::currentDate());
-		/*cbCols.append(new QComboBox());
-		cbCols.back()->setProperty("tag", "compare");
-		cbCols.back()->addItems({"<", "<=", "=", ">=", ">"});
-		innerLayouts.back()->addRow(cbCols.back(), deDates.back());*/
-		cbCombo.append(new QComboBox());
-		cbCombo.back()->setProperty("tag", "compare");
-		cbCombo.back()->addItems({"<", "<=", "=", ">=", ">"});
-		innerLayouts.back()->addRow(cbCombo.back(), deDates.back());
+		switch(index)
+		{
+		case 0:
+		{
+			leLines.append(new QLineEdit());
+			//innerLayouts.back()->addWidget(leLines.back());
+			innerLayouts.at(layoutIndex)->addWidget(leLines.back());
+			break;
+		}
+		case 1:
+		{
+			chCheck.append(new QCheckBox("Shop flag"));
+			//innerLayouts.back()->addWidget(chCheck.back());
+			innerLayouts.at(layoutIndex)->addWidget(chCheck.back());
+			break;
+		}
+		}
 		break;
 	}
+
 	}
 }
 
@@ -164,95 +261,153 @@ QString FilterDialog::returnFilterString()
 	{
 		//res=res+cbCols.at(i)->currentText();
 		QLayoutItem *child;
-		switch(cbCols.at(i)->currentIndex())
+		switch(tIndex)
 		{
 		case 0:
-		case 3:
-		case 4:
-		{
-			if(cbCols.at(i)->currentIndex()==3)
-				//res=res+"categories.";
-				resArr.append("categories.name");
-			else
-				if(cbCols.at(i)->currentIndex()==4)
-					//res=res+"shops.";
-					resArr.append("shops.name");
-			//res=res+"name";
+			{
+			switch(cbCols.at(i)->currentIndex())
+			{
+			case 0:
+			case 3:
+			case 4:
+			{
+				if(cbCols.at(i)->currentIndex()==3)
+					//res=res+"categories.";
+					resArr.append("categories.name");
 				else
-					resArr.append("expenses.name");
-			for(uint8_t j=0;j<innerLayouts.at(i)->count();j++)
-			{
-				child=innerLayouts.at(i)->takeAt(j);
-				for(uint8_t k=0;k<leLines.size();k++)
-					if(child->widget()==leLines.at(k))
-					{
-						//res=res+"=\""+leLines.at(k)->text()+"\"";
-						resArr.back().append("=\""+leLines.at(k)->text()+"\"");
-						break;
-					}
+					if(cbCols.at(i)->currentIndex()==4)
+						//res=res+"shops.";
+						resArr.append("shops.name");
+				//res=res+"name";
+					else
+						resArr.append("expenses.name");
+				for(uint8_t j=0;j<innerLayouts.at(i)->count();j++)
+				{
+					child=innerLayouts.at(i)->takeAt(j);
+					for(uint8_t k=0;k<leLines.size();k++)
+						if(child->widget()==leLines.at(k))
+						{
+							//res=res+"=\""+leLines.at(k)->text()+"\"";
+							resArr.back().append("=\""+leLines.at(k)->text()+"\"");
+							break;
+						}
+				}
+				break;
 			}
-			break;
-		}
-		case 1:
-		{
-			//res=res+"val";
-			resArr.append("val");
-			while((child=innerLayouts.at(i)->takeAt(0))!=0)
+			case 1:
 			{
-				for(uint8_t j=0;j<cbCombo.size();j++)
-					if((child->widget()==cbCombo.at(j))&&(cbCombo.at(j)->property("tag")=="compare"))
-					{
-						//res=res+cbCombo.at(j)->currentText();
-						resArr.back().append(cbCombo.at(j)->currentText());
-						break;
-					}
-				for(uint8_t j=0;j<dsbVals.size();j++)
-					if(child->widget()==dsbVals.at(j))
-					{
-						//res=res+QString::number(dsbVals.at(j)->value());
-						resArr.back().append(QString::number(dsbVals.at(j)->value()));
-						break;
-					}
+				//res=res+"val";
+				resArr.append("val");
+				while((child=innerLayouts.at(i)->takeAt(0))!=0)
+				{
+					for(uint8_t j=0;j<cbCombo.size();j++)
+						if((child->widget()==cbCombo.at(j))&&(cbCombo.at(j)->property("tag")=="compare"))
+						{
+							//res=res+cbCombo.at(j)->currentText();
+							resArr.back().append(cbCombo.at(j)->currentText());
+							break;
+						}
+					for(uint8_t j=0;j<dsbVals.size();j++)
+						if(child->widget()==dsbVals.at(j))
+						{
+							//res=res+QString::number(dsbVals.at(j)->value());
+							resArr.back().append(QString::number(dsbVals.at(j)->value()));
+							break;
+						}
+				}
+				break;
+			}
+			case 2:
+			{
+				//res=res+"date";
+				resArr.append("date");
+				while((child=innerLayouts.at(i)->takeAt(0))!=0)
+				{
+
+					for(uint8_t j=0;j<cbCombo.size();j++)
+						if((child->widget()==cbCombo.at(j))&&(cbCombo.at(j)->property("tag")=="compare"))
+						{
+							//res=res+cbCombo.at(j)->currentText();
+							resArr.back().append(cbCombo.at(j)->currentText());
+							break;
+						}
+					for(uint8_t j=0;j<deDates.size();j++)
+						if(child->widget()==deDates.at(j))
+						{
+							//res=res+"\""+deDates.at(j)->text()+"\"";
+							resArr.back().append("\""+deDates.at(j)->text()+"\"");
+							break;
+						}
+				}
+				break;
+			}
+			}
+			for(uint8_t j=0;j<filterLayouts.at(i)->count();j++)
+			{
+				child=filterLayouts.at(i)->itemAt(j);
+				for(uint8_t k=0;k<cbCombo.size();k++)
+				if((child->widget()==cbCombo.at(k))&&(cbCombo.at(k)->property("tag")=="logic"))
+					//res=res+" "+cbCombo.at(k)->currentText()+" ";
+					logicArr.append(" "+cbCombo.at(k)->currentText()+" ");
+
 			}
 			break;
 		}
 		case 2:
 		{
-			//res=res+"date";
-			resArr.append("date");
-			while((child=innerLayouts.at(i)->takeAt(0))!=0)
+			switch(cbCols.at(i)->currentIndex())
 			{
-
-				for(uint8_t j=0;j<cbCombo.size();j++)
-					if((child->widget()==cbCombo.at(j))&&(cbCombo.at(j)->property("tag")=="compare"))
-					{
-						//res=res+cbCombo.at(j)->currentText();
-						resArr.back().append(cbCombo.at(j)->currentText());
-						break;
-					}
-				for(uint8_t j=0;j<deDates.size();j++)
-					if(child->widget()==deDates.at(j))
-					{
-						//res=res+"\""+deDates.at(j)->text()+"\"";
-						resArr.back().append("\""+deDates.at(j)->text()+"\"");
-						break;
-					}
+			case 0:
+			{
+				resArr.append("name");
+				for(uint8_t j=0;j<innerLayouts.at(i)->count();j++)
+				{
+					child=innerLayouts.at(i)->takeAt(j);
+					for(uint8_t k=0;k<leLines.size();k++)
+						if(child->widget()==leLines.at(k))
+						{
+							resArr.back().append("=\""+leLines.at(k)->text()+"\"");
+							break;
+						}
+				}
+				break;
+			}
+			case 1:
+			{
+				resArr.append("shopAvailable");
+				for(uint8_t j=0;j<innerLayouts.at(i)->count();j++)
+				{
+					child=innerLayouts.at(i)->takeAt(j);
+					for(uint8_t k=0;k<chCheck.size();k++)
+						if(child->widget()==chCheck.at(k))
+						{
+							resArr.back().append(QString::fromAscii(chCheck.at(k)->checkState()?"=1":"=0"));
+							break;
+						}
+				}
+				break;
+			}
+			}
+			for(uint8_t j=0;j<filterLayouts.at(i)->count();j++)
+			{
+				child=filterLayouts.at(i)->itemAt(j);
+				for(uint8_t k=0;k<cbCombo.size();k++)
+					if((child->widget()==cbCombo.at(k))&&(cbCombo.at(k)->property("tag")=="logic"))
+						logicArr.append(" "+cbCombo.at(k)->currentText()+" ");
 			}
 			break;
 		}
 		}
-		for(uint8_t j=0;j<filterLayouts.at(i)->count();j++)
-		{
-			child=filterLayouts.at(i)->itemAt(j);
-			for(uint8_t k=0;k<cbCombo.size();k++)
-			if((child->widget()==cbCombo.at(k))&&(cbCombo.at(k)->property("tag")=="logic"))
-				//res=res+" "+cbCombo.at(k)->currentText()+" ";
-				logicArr.append(" "+cbCombo.at(k)->currentText()+" ");
-		}
 	}
-	res=resArr.at(0);
+	res+=resArr.at(0);
 	for(uint8_t i=0;i<logicArr.size();i++)
 		res=res+logicArr.at(i)+resArr.at(i+1);
+	//в случае базовой таблицы обязательно вносить в запрос проверку соответствия с другими таблицами
+	if(tIndex==0)
+	{
+		res.prepend(" categories.id=categoryId AND shops.id=shopId AND (");
+		res.append(")");
+	}
 	return res;
 }
 
@@ -291,5 +446,8 @@ FilterDialog::~FilterDialog()
 	for(uint8_t i=0;i<cbCombo.size();i++)
 		if(cbCombo.at(i))
 			delete cbCombo.at(i);
+	for(uint8_t i=0;i<chCheck.size();i++)
+		if(chCheck.at(i))
+			delete chCheck.at(i);
 	delete ui;
 }

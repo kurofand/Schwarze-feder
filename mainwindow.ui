@@ -45,6 +45,20 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
+           <widget class="QPushButton" name="pbSelect">
+            <property name="text">
+             <string>Select table</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbFilter">
+            <property name="text">
+             <string>Show filter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pbRefresh">
             <property name="text">
              <string>Refresh</string>
@@ -59,16 +73,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pbSelect">
+           <widget class="QPushButton" name="pbEdit">
             <property name="text">
-             <string>Select table</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbFilter">
-            <property name="text">
-             <string>Show filter</string>
+             <string>Edit</string>
             </property>
            </widget>
           </item>
@@ -124,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>952</width>
-     <height>46</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>

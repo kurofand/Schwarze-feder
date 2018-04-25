@@ -10,12 +10,17 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	//настройки отображения для виджета-таблицы
 	ui->tableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
+	ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+	ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 	tableEditor=new TableEditor(*ui->tableWidget);
 
 	connect(this, SIGNAL(executeQuery(QString*)), tableEditor, SLOT(executeQuery(QString*)));
 	connect(ui->pbRefresh, SIGNAL(clicked(bool)), tableEditor, SLOT(refreshTable()));
 	connect(tableEditor, SIGNAL(buttonEnabled(uint8_t)), this, SLOT(buttonEnabled(uint8_t)));
+	connect(this, SIGNAL(setCurrentQuery(QString*,uint8_t)), tableEditor, SLOT(setCurrentQuery(QString*,uint8_t)));
+	connect(ui->pbEdit, SIGNAL(clicked(bool)), tableEditor, SLOT(editTable()));
 }
 void MainWindow::on_pbRunSQL_clicked()
 {
@@ -32,14 +37,16 @@ void MainWindow::on_pbSelect_clicked()
 	if(dialog->exec())
 	{
 		res=dialog->returnParams();
-
-		switch(res.at(0).toInt())
+		currentTable=res.at(0).toInt();
+		QString colsstr="id, ";
+		switch(currentTable)
 		{
 		case 0:
 		{
 			str.replace(QString("##"), QString("expenses INNER JOIN categories, shops WHERE categories.id=categoryId AND shops.id=shopId"));
 			QString cols[]={"expenses.name", "val", "descr" , "date", "categories.name", "shops.name"};
-			QString colsstr;
+			//QString colsstr="expenses.id, ";
+			colsstr.prepend("expenses.");
 			for(uint8_t i=0;i<6;i++)
 				if(res.at(i+1)=="1")
 					colsstr.append(cols[i]+", ");
@@ -52,7 +59,7 @@ void MainWindow::on_pbSelect_clicked()
 		{
 			str.replace(QString("##"), QString("expenses"));
 			QString cols[]={"name", "val", "descr", "date"};
-			QString colsstr;
+			//QString colsstr;
 			for(uint8_t i=0;i<4;i++)
 				if(res.at(i+1)=="1")
 					colsstr.append(cols[i]+", ");
@@ -65,7 +72,7 @@ void MainWindow::on_pbSelect_clicked()
 		{
 			str.replace(QString("##"), QString("categories"));
 			QString cols[]={"name", "shopAvailable"};
-			QString colsstr;
+			//QString colsstr;
 			for(uint8_t i=0;i<2;i++)
 				if(res.at(i+1)=="1")
 					colsstr.append(cols[i]+", ");
@@ -78,14 +85,14 @@ void MainWindow::on_pbSelect_clicked()
 		{
 			str.replace(QString("##"), QString("shops"));
 			if(res.at(1)=="1")
-				str.replace(QString("#"), QString("name"));
+				str.replace(QString("#"), QString("id, name"));
 			break;
 		}
 		case 4:
 		{
 			str.replace(QString("##"), QString("currency"));
 			QString cols[]={"name", "ind", "mainFlag"};
-			QString colsstr;
+			//QString colsstr;
 			for(uint8_t i=0;i<3;i++)
 				if(res.at(i+1)=="1")
 					colsstr.append(cols[i]+", ");
@@ -97,7 +104,8 @@ void MainWindow::on_pbSelect_clicked()
 		}
 	}
 	str=str.toUtf8();
-	emit(executeQuery(&str));
+	//emit(executeQuery(&str));
+	emit(setCurrentQuery(&str, 0));
 	delete dialog;
 }
 
@@ -171,22 +179,29 @@ void MainWindow::on_pbAdd_clicked()
 
 void MainWindow::on_pbFilter_clicked()
 {
-	FilterDialog *dialog=new FilterDialog();
+	//покаместь индекс ручками
+	FilterDialog *dialog=new FilterDialog(0,currentTable);
 	if(dialog->exec())
 	{
 		QString filterQuery=dialog->returnFilterString();
-		QString query="SELECT expenses.name, descr, val, date, "
+		/*QString query="SELECT expenses.name, descr, val, date, "
 					  "categories.name, shops.name "
 					  "FROM expenses INNER JOIN categories, shops "
-					  "WHERE shopId=shops.id AND categories.id=categoryId AND ("+filterQuery+ ")";
+					  "WHERE shopId=shops.id AND categories.id=categoryId AND ("+filterQuery+ ")";*/
+		//QString query=" AND (" + filterQuery + ")";
+		QString query=filterQuery;
 		query=query.toUtf8();
-		emit(executeQuery(&query));
+		qDebug()<<query;
+		emit(setCurrentQuery(&query, 1));
+		//emit(executeQuery(&query));
 	}
 	delete dialog;
 }
 
 void MainWindow::buttonEnabled(uint8_t ind)
 {
+	//qDebug()<<Q_FUNC_INFO;
+	qDebug()<<"not connected";
 	switch(ind)
 	{
 	//all disabled
@@ -200,6 +215,7 @@ void MainWindow::buttonEnabled(uint8_t ind)
 	}
 	}
 }
+
 
 MainWindow::~MainWindow()
 {

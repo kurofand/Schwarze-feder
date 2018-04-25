@@ -10,6 +10,7 @@
 #include <QLineEdit>
 #include <QDoubleSpinBox>
 #include <QDateEdit>
+#include <QCheckBox>
 
 namespace Ui {
 class FilterDialog;
@@ -34,6 +35,7 @@ private:
 	QList<QLineEdit *> leLines;
 	QList<QDoubleSpinBox *> dsbVals;
 	QList<QDateEdit *> deDates;
+	QList<QCheckBox *> chCheck;
 	uint8_t tIndex=0;
 	void deleteElements(QList<QWidget *> *list);
 private slots:

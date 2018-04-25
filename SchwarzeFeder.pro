@@ -33,7 +33,8 @@ SOURCES += \
     tableeditor.cpp \
     insertdialog.cpp \
     selectdialog.cpp \
-    filterdialog.cpp
+    filterdialog.cpp \
+    editdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,10 +42,12 @@ HEADERS += \
     tableeditor.h \
     insertdialog.h \
     selectdialog.h \
-    filterdialog.h
+    filterdialog.h \
+    editdialog.h
 
 FORMS += \
         mainwindow.ui \
     insertdialog.ui \
     selectdialog.ui \
-    filterdialog.ui
+    filterdialog.ui \
+    editdialog.ui
