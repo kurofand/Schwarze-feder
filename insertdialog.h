@@ -26,9 +26,9 @@ private:
 	Ui::InsertDialog *ui;
 	//objects for dynamic interface
 	QLabel *lValue=nullptr, *lCategory=nullptr, *lDescription=nullptr, *lShop=nullptr, *lDate=nullptr,
-	*lIndex=nullptr, *lMain=nullptr, *lShopAvailable=nullptr;
+	*lIndex=nullptr, *lMain=nullptr, *lShopAvailable=nullptr, *lCurrency=nullptr;
 	QDoubleSpinBox *dsbValue=nullptr, *dsbIndex=nullptr;
-	QComboBox *cbCategory=nullptr, *cbShop=nullptr;
+	QComboBox *cbCategory=nullptr, *cbShop=nullptr, *cbCurrency=nullptr;
 	QTextEdit *teDescription=nullptr;
 	QDateEdit *deDate=nullptr;
 	QCheckBox *chbMain=nullptr, *chbShopAvailable=nullptr;

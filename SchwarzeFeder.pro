@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SchwarzeFeder
 TEMPLATE = app
 
-LIBS += -L/usr/local/lib -L/usr/lib  -lmysqlcppconn
+LIBS += -L/usr/local/lib -L/usr/lib  -lmysqlcppconn -lsqlite3
 
 INCLUDEPATH += -I/usr/local/include/cppconn
 # The following define makes your compiler emit warnings if you use
@@ -34,7 +34,8 @@ SOURCES += \
     insertdialog.cpp \
     selectdialog.cpp \
     filterdialog.cpp \
-    editdialog.cpp
+    editdialog.cpp \
+    sqliteclient.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,7 +44,8 @@ HEADERS += \
     insertdialog.h \
     selectdialog.h \
     filterdialog.h \
-    editdialog.h
+    editdialog.h \
+    sqliteclient.hpp
 
 FORMS += \
         mainwindow.ui \

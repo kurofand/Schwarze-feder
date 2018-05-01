@@ -3,6 +3,7 @@
 #include <QTableWidget>
 #include <QObject>
 #include "mysqlClient.hpp"
+#include "sqliteclient.hpp"
 
 class TableEditor: public QObject
 {
@@ -15,12 +16,14 @@ public:
 
 private:
 	QTableWidget *table;
-	MySQLClient *client;
+	SqliteClient *client;
+	//MySQLClient *client;
 	QString currentQuery="SELECT expenses.name, val, date, descr, categories.name, shops.name "
 						 "FROM expenses INNER JOIN categories, shops "
 						 "WHERE categoryId=categories.id "
 						 "AND shopId=shops.id";
 	QList <uint32_t> *ids;
+	uint8_t tableIndex;
 	void reloadTable(std::vector<std::string> *vec);
 
 public slots:
@@ -30,6 +33,8 @@ public slots:
 	//первая на вхере
 	void setCurrentQuery(QString *part, uint8_t pos);
 	void editTable();
+	void selectTable();
+	void insertTable();
 signals:
 	void buttonEnabled(uint8_t ind);
 };

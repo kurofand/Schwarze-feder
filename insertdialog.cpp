@@ -1,6 +1,7 @@
 #include "insertdialog.h"
 #include "ui_insertdialog.h"
-#include "mysqlClient.hpp"
+//#include "mysqlClient.hpp"
+#include "sqliteclient.hpp"
 /*koslyli i kopipasta inside*/
 InsertDialog::InsertDialog(QWidget *parent) :
 	QDialog(parent),
@@ -27,6 +28,9 @@ void InsertDialog::selectTable(int index)
 	{
 		lValue->hide();
 		dsbValue->hide();
+		cbCurrency->hide();
+		cbCurrency->setCurrentIndex(-1);
+		lCurrency->hide();
 		lDescription->hide();
 		teDescription->hide();
 		lDate->hide();
@@ -76,6 +80,36 @@ void InsertDialog::selectTable(int index)
 		}
 		else
 			dsbValue->show();
+		if(!lCurrency)
+		{
+			lCurrency=new QLabel("Currency type");
+			ui->gridLayout->addWidget(lCurrency);
+		}
+		else
+			lCurrency->show();
+		if(!cbCurrency)
+		{
+			cbCurrency=new QComboBox();
+			ui->gridLayout->addWidget(cbCurrency);
+			SqliteClient *client=new SqliteClient("SchwarzeFeder.db");
+			client->connect();
+			std::vector<std::string> *vec=new std::vector<std::string>();
+			client->executeQuery("SELECT name FROM currency", *vec);
+			QStringList list;
+			for(uint16_t i=0;i<vec->size();i++)
+			{
+				QString str=QString::fromStdString(vec->at(i));
+				str=str.fromUtf8(str.toAscii());
+				list.append(str);
+			}
+			cbCurrency->addItems(list);
+			client->closeConnection();
+			delete vec;
+			delete client;
+			cbCurrency->setCurrentIndex(-1);
+		}
+		else
+			cbCurrency->show();
 		if(!lDescription)
 		{
 			lDescription=new QLabel("Description");
@@ -117,15 +151,8 @@ void InsertDialog::selectTable(int index)
 		{
 			cbCategory=new QComboBox();
 			ui->gridLayout->addWidget(cbCategory);
-			MySQLClient *client;
-			std::ifstream ini;
-			std::string params[4];
-			ini.open("connect.ini");
-			if(ini.is_open())
-			{
-				for(uint8_t i=0;i<4;i++)
-					ini>>params[i];
-				client=new MySQLClient(params[0].c_str(), params[1].c_str(), params[2].c_str(), params[3].c_str());
+			SqliteClient *client;
+			client=new SqliteClient("SchwarzeFeder.db");
 				client->connect();
 				std::vector<std::string> *vec=new std::vector<std::string>();
 				client->executeQuery("SELECT name FROM categories", *vec);
@@ -138,8 +165,9 @@ void InsertDialog::selectTable(int index)
 				}
 				cbCategory->addItems(list);
 				client->closeConnection();
+				delete vec;
 				delete client;
-			}
+			//}
 			cbCategory->setCurrentIndex(-1);
 			connect(cbCategory, SIGNAL(currentIndexChanged(QString)), this, SLOT(selectCategory(QString)));
 		}
@@ -207,15 +235,17 @@ void InsertDialog::selectCategory(QString text)
 {
 	if(text!="")
 	{
-		MySQLClient *client;
-		std::ifstream ini;
+		//MySQLClient *client;
+		SqliteClient *client;
+		/*std::ifstream ini;
 		std::string params[4];
 		ini.open("connect.ini");
 		if(ini.is_open())
 		{
 			for(uint8_t i=0;i<4;i++)
 				ini>>params[i];
-			client=new MySQLClient(params[0].c_str(), params[1].c_str(), params[2].c_str(), params[3].c_str());
+			client=new MySQLClient(params[0].c_str(), params[1].c_str(), params[2].c_str(), params[3].c_str());*/
+		client=new SqliteClient("SchwarzeFeder.db");
 			client->connect();
 			std::vector<std::string> *vec=new std::vector<std::string>();
 			QString query="SELECT shopAvailable FROM categories WHERE name=\""+text+"\"";
@@ -254,7 +284,7 @@ void InsertDialog::selectCategory(QString text)
 			client->closeConnection();
 			delete vec;
 			delete client;
-		}
+		//}
 	}
 }
 
@@ -269,6 +299,8 @@ QStringList InsertDialog::returnParams()
 	{
 		if(dsbValue)
 			result.append("val|"+QString::number(dsbValue->value()));
+		if(cbCurrency)
+			result.append("currencyId|"+QString::number(cbCurrency->currentIndex()+1));
 		if(teDescription)
 			result.append("descr|\""+teDescription->document()->toPlainText()+"\"");
 		if(deDate)
@@ -312,5 +344,6 @@ InsertDialog::~InsertDialog()
 	if(dsbIndex) delete dsbIndex;
 	if(lMain) delete lMain;
 	if(chbMain) delete chbMain;
+	if(cbCurrency) delete cbCurrency;
 	delete ui;
 }
