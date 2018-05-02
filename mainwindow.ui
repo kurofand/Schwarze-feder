@@ -134,6 +134,13 @@
      <height>30</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuMenu">
+    <property name="title">
+     <string>&amp;Menu</string>
+    </property>
+    <addaction name="aExit"/>
+   </widget>
+   <addaction name="menuMenu"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -142,8 +149,73 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="aSelect"/>
+   <addaction name="aRefresh"/>
+   <addaction name="aFilter"/>
+   <addaction name="aAdd"/>
+   <addaction name="aEdit"/>
+   <addaction name="aDelete"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="aSelect">
+   <property name="icon">
+    <iconset>
+     <normaloff>../Downloads/icons8-database-50.png</normaloff>../Downloads/icons8-database-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select</string>
+   </property>
+  </action>
+  <action name="aRefresh">
+   <property name="icon">
+    <iconset>
+     <normaloff>../Downloads/icons8-data-backup-50.png</normaloff>../Downloads/icons8-data-backup-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+  </action>
+  <action name="aFilter">
+   <property name="icon">
+    <iconset>
+     <normaloff>../Downloads/icons8-conversion-50.png</normaloff>../Downloads/icons8-conversion-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Filter</string>
+   </property>
+  </action>
+  <action name="aAdd">
+   <property name="icon">
+    <iconset>
+     <normaloff>../Downloads/icons8-add-row-50.png</normaloff>../Downloads/icons8-add-row-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add</string>
+   </property>
+  </action>
+  <action name="aEdit">
+   <property name="icon">
+    <iconset>
+     <normaloff>../Downloads/icons8-edit-row-50.png</normaloff>../Downloads/icons8-edit-row-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit</string>
+   </property>
+  </action>
+  <action name="aDelete">
+   <property name="icon">
+    <iconset>
+     <normaloff>../Downloads/icons8-delete-row-50.png</normaloff>../Downloads/icons8-delete-row-50.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="aExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

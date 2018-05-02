@@ -66,7 +66,7 @@ EditDialog::EditDialog(QWidget *parent, uint8_t tabIndex, const char* record) :
 	case 2:
 	{
 		chShopFl=new QCheckBox();
-		ui->formLayout->addRow("Shop flag"), chShopFl;
+		ui->formLayout->addRow("Shop flag", chShopFl);
 		if(params.at(1)=="1")
 			chShopFl->setChecked(true);
 		break;
@@ -75,7 +75,7 @@ EditDialog::EditDialog(QWidget *parent, uint8_t tabIndex, const char* record) :
 	{
 		dsbInd=new QDoubleSpinBox();
 		dsbInd->setMaximum(9999999);
-		dsbInd->setValue(QString::toDouble(params.at(1)));
+		dsbInd->setValue(params.at(1).toDouble());
 		ui->formLayout->addRow("Convertion index", dsbInd);
 		chMainCurrency=new QCheckBox();
 		ui->formLayout->addRow("Main flag", chMainCurrency);
@@ -152,6 +152,17 @@ QStringList EditDialog::returnParams()
 			res.append(QString::number(cbShop->currentIndex()+1));
 		else
 			res.append("1");
+		break;
+	}
+	case 2:
+	{
+		res.append(chShopFl->isChecked()?"1":"0");
+		break;
+	}
+	case 4:
+	{
+		res.append(QString::number(dsbInd->value()));
+		res.append(chMainCurrency->isChecked()?"1":"0");
 		break;
 	}
 	}

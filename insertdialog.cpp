@@ -307,7 +307,7 @@ QStringList InsertDialog::returnParams()
 			result.append("date|\""+deDate->text()+"\"");
 		if(cbCategory)
 			result.append("categoryId|"+QString::number(cbCategory->currentIndex()+1));
-		if(cbShop)
+		if(cbShop&&cbShop->currentIndex()!=-1)
 			result.append("shopId|"+QString::number(cbShop->currentIndex()+1));
 		break;
 	}

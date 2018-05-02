@@ -11,6 +11,7 @@ class TableEditor: public QObject
 public:
 	TableEditor(QTableWidget &widget,QObject *parent=0);
 	void setTable(QTableWidget &widget);
+	bool clientConnect();
 
 	virtual ~TableEditor();
 
@@ -25,6 +26,7 @@ private:
 	QList <uint32_t> *ids;
 	uint8_t tableIndex;
 	void reloadTable(std::vector<std::string> *vec);
+	uint16_t getSelectedId();
 
 public slots:
 	void executeQuery(QString *query);
@@ -35,6 +37,12 @@ public slots:
 	void editTable();
 	void selectTable();
 	void insertTable();
+	void deleteTable();
+	void setFilter();
+
+private slots:
+	void enableEditDelete();
+
 signals:
 	void buttonEnabled(uint8_t ind);
 };

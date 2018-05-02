@@ -9,19 +9,30 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	this->buttonEnabled(disableAll);
 	//настройки отображения для виджета-таблицы
 	ui->tableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
 	ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+
 	tableEditor=new TableEditor(*ui->tableWidget);
 
+
 	connect(this, SIGNAL(executeQuery(QString*)), tableEditor, SLOT(executeQuery(QString*)));
-	connect(ui->pbRefresh, SIGNAL(clicked(bool)), tableEditor, SLOT(refreshTable()));
 	connect(tableEditor, SIGNAL(buttonEnabled(uint8_t)), this, SLOT(buttonEnabled(uint8_t)));
 	connect(this, SIGNAL(setCurrentQuery(QString*,uint8_t)), tableEditor, SLOT(setCurrentQuery(QString*,uint8_t)));
-	connect(ui->pbEdit, SIGNAL(clicked(bool)), tableEditor, SLOT(editTable()));
-	connect(ui->pbAdd, SIGNAL(clicked(bool)), tableEditor, SLOT(insertTable()));
-	connect(ui->pbSelect, SIGNAL(clicked(bool)), tableEditor, SLOT(selectTable()));
+	connect(ui->aSelect, SIGNAL(triggered(bool)), tableEditor, SLOT(selectTable()));
+	connect(ui->aRefresh, SIGNAL(triggered(bool)), tableEditor, SLOT(refreshTable()));
+	connect(ui->aFilter, SIGNAL(triggered(bool)), tableEditor, SLOT(setFilter()));
+	connect(ui->aAdd, SIGNAL(triggered(bool)), tableEditor, SLOT(insertTable()));
+	connect(ui->aEdit, SIGNAL(triggered(bool)), tableEditor, SLOT(editTable()));
+	connect(ui->aDelete, SIGNAL(triggered(bool)), tableEditor, SLOT(deleteTable()));
+	connect(ui->aExit, SIGNAL(triggered(bool)), this, SLOT(close()));
+
+	//tableEditor->clientConnect();
+	//интерфейсный костыль
+	ui->wSettings->setVisible(false);
+	ui->statusBar->showMessage(QString::fromAscii("Connection status: ")+QString::fromAscii(tableEditor->clientConnect()?"connected":"disconnected"));
 }
 void MainWindow::on_pbRunSQL_clicked()
 {
@@ -30,41 +41,53 @@ void MainWindow::on_pbRunSQL_clicked()
 	emit(executeQuery(&query));
 }
 
-void MainWindow::on_pbFilter_clicked()
+void MainWindow::close()
 {
-	//покаместь индекс ручками
-	FilterDialog *dialog=new FilterDialog(0,currentTable);
-	if(dialog->exec())
-	{
-		QString filterQuery=dialog->returnFilterString();
-		/*QString query="SELECT expenses.name, descr, val, date, "
-					  "categories.name, shops.name "
-					  "FROM expenses INNER JOIN categories, shops "
-					  "WHERE shopId=shops.id AND categories.id=categoryId AND ("+filterQuery+ ")";*/
-		//QString query=" AND (" + filterQuery + ")";
-		QString query=filterQuery;
-		query=query.toUtf8();
-		qDebug()<<query;
-		emit(setCurrentQuery(&query, 1));
-		//emit(executeQuery(&query));
-	}
-	delete dialog;
+	QApplication::quit();
 }
 
 void MainWindow::buttonEnabled(uint8_t ind)
 {
-	//qDebug()<<Q_FUNC_INFO;
-	qDebug()<<"not connected";
+	//qDebug()<<"not connected";
 	switch(ind)
 	{
-	//all disabled
-	case 0:
+	case disableAll:
 	{
-		ui->pbAdd->setEnabled(false);
-		ui->pbFilter->setEnabled(false);
-		ui->pbRefresh->setEnabled(false);
-		ui->pbRunSQL->setEnabled(false);
-		ui->pbSelect->setEnabled(false);
+		ui->aSelect->setEnabled(false);
+		ui->aRefresh->setEnabled(false);
+		ui->aFilter->setEnabled(false);
+		ui->aAdd->setEnabled(false);
+		ui->aEdit->setEnabled(false);
+		ui->aDelete->setEnabled(false);
+		break;
+	}
+	case enableSelect:
+	{
+		ui->aSelect->setEnabled(true);
+		break;
+	}
+	case enableFilter:
+	{
+		ui->aRefresh->setEnabled(true);
+		ui->aFilter->setEnabled(true);
+		break;
+	}
+	case enableAdd:
+	{
+		ui->aAdd->setEnabled(true);
+		break;
+	}
+	case enableEditDelete:
+	{
+		ui->aEdit->setEnabled(true);
+		ui->aDelete->setEnabled(true);
+		break;
+	}
+	case disableEditDelete:
+	{
+		ui->aEdit->setEnabled(false);
+		ui->aDelete->setEnabled(false);
+		break;
 	}
 	}
 }

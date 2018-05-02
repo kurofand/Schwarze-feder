@@ -4,18 +4,34 @@
 #include "editdialog.h"
 #include "selectdialog.h"
 #include "insertdialog.h"
+#include "filterdialog.h"
 
 TableEditor::TableEditor(QTableWidget &widget, QObject *parent) :
 	QObject(parent)
 {
 	client=new SqliteClient("SchwarzeFeder.db");
-	if(!client->connect())
-	{
-		emit(buttonEnabled(0));
-
-	}
 	table=&widget;
 	ids=new QList<uint32_t>;
+	connect(table, SIGNAL(cellActivated(int,int)), this, SLOT(enableEditDelete()));
+}
+
+void TableEditor::enableEditDelete()
+{
+	emit buttonEnabled(4);
+}
+
+bool TableEditor::clientConnect()
+{
+	if(!client->connect())
+	{
+		emit buttonEnabled(0);
+		return false;
+	}
+	else
+	{
+		emit buttonEnabled(1);
+		return true;
+	}
 }
 
 void TableEditor::setTable(QTableWidget &widget)
@@ -25,6 +41,8 @@ void TableEditor::setTable(QTableWidget &widget)
 
 void TableEditor::reloadTable(std::vector<std::string> *vec)
 {
+	if(vec->size()==0)
+		emit buttonEnabled(5);
 	for(uint16_t i=0;i<vec->size();i++)
 	{
 		QString id=QString::fromStdString(vec->at(i));
@@ -39,9 +57,8 @@ void TableEditor::reloadTable(std::vector<std::string> *vec)
 	for(uint16_t i=0;i<vec->size();i++)
 	{
 		/*тут должно быть обновление названия столбцов таблицы*/
-		QStringList avHeaders/*={"Name", "Descriptoin", "Price", "Date", "Category", "Shop", "Shop flag", "Convert index", "Main currency flag"}*/;
+		QStringList avHeaders;
 		QStringList headers;
-//		QString cols=currentQuery.replace(QString("SELECT "), QString(""));
 		QString cols=currentQuery;
 		cols.replace(QString("SELECT "), QString(""));
 		cols=cols.split("FROM")[0];
@@ -145,6 +162,7 @@ void TableEditor::insertTable()
 {
 	InsertDialog *dialog=new InsertDialog();
 	QStringList res;
+	QString oldQuery=currentQuery;
 	if(dialog->exec())
 	{
 		res=dialog->returnParams();
@@ -200,14 +218,22 @@ void TableEditor::insertTable()
 		delete vec;
 	}
 	delete dialog;
+	currentQuery=oldQuery;
+	emit(refreshTable());
+}
+
+uint16_t TableEditor::getSelectedId()
+{
+	uint16_t res;
+	for(res=0;res<table->rowCount();res++)
+		if(table->item(res, 0)->isSelected())
+			break;
+	return ids->at(res);
 }
 
 void TableEditor::editTable()
 {
-	uint16_t row;
-	for(row=0;row<table->rowCount();row++)
-		if(table->item(row, 0)->isSelected())
-			break;
+	uint16_t id=this->getSelectedId();
 	//сюды надо перенести как-то активную таблицу
 	//активная таблица в классовом таблеиндексе
 	std::vector<std::string> *vec=new std::vector<std::string>();
@@ -225,7 +251,7 @@ void TableEditor::editTable()
 	}
 	case 2:
 	{
-		query.append("name, shopAvailable, FROM categories WHERE id=");
+		query.append("name, shopAvailable FROM categories WHERE id=");
 		break;
 	}
 	case 3:
@@ -239,7 +265,7 @@ void TableEditor::editTable()
 		break;
 	}
 	}
-	query.append(QString::number(ids->at(row)));
+	query.append(QString::number(id));
 	client->executeQuery(query.toAscii(), *vec);
 	//поскольку фильтруем по уникальному ид можно смело брать нулевой элемент
 	EditDialog *dialog=new EditDialog(0, tableIndex, vec->at(0).c_str());
@@ -252,15 +278,70 @@ void TableEditor::editTable()
 		case 0:
 		case 1:
 		{
-			query.append("expenses SET name=\""+res.at(0)+"\", descr=\""+res.at(2)+"\", val="+res.at(1)+", date=\""+res.at(3)+"\", categoryId="+res.at(4)+", shopId="+res.at(5)+" WHERE id="+QString::number(ids->at(row)));
+			query.append("expenses SET name=\""+res.at(0)+"\", descr=\""+res.at(2)+"\", val="+res.at(1)+", date=\""+res.at(3)+"\", categoryId="+res.at(4)+", shopId="+res.at(5));
+			break;
+		}
+		case 2:
+		{
+			query.append("categories SET name=\""+res.at(0)+"\", shopAvailable="+res.at(1));
+			break;
+		}
+		case 3:
+		{
+			query.append("shops SET name=\""+res.at(0)+"\"");
+			break;
+		}
+		case 4:
+		{
+			query.append("currency SET name=\""+res.at(0)+"\", ind="+res.at(1)+", mainFlag="+res.at(2));
 			break;
 		}
 		}
+		query.append(" WHERE id="+QString::number(id));
 		client->executeQuery(query.toUtf8(),*vec);
 	}
 	delete vec;
 	delete dialog;
 	currentQuery=oldQuery;
+	emit(refreshTable());
+}
+
+void TableEditor::deleteTable()
+{
+	uint16_t id=this->getSelectedId();
+	QString oldQuery=currentQuery;
+	QString query="DELETE FROM # WHERE id="+QString::number(id);
+	QString table;
+	switch(tableIndex)
+	{
+	case 0:
+	case 1:
+	{
+		table="expenses";
+		break;
+	}
+	case 2:
+	{
+		table="categories";
+		break;
+	}
+	case 3:
+	{
+		table="shops";
+		break;
+	}
+	case 4:
+	{
+		table="currency";
+		break;
+	}
+	}
+	query.replace(QString("#"), table);
+	std::vector<std::string> *vec=new std::vector<std::string>();
+	client->executeQuery(query.toAscii(), *vec);
+	delete vec;
+	currentQuery=oldQuery;
+	emit(refreshTable());
 }
 
 void TableEditor::selectTable()
@@ -335,7 +416,26 @@ void TableEditor::selectTable()
 	}
 	str=str.toUtf8();
 	emit(setCurrentQuery(&str, 0));
+	emit buttonEnabled(2);
+	emit buttonEnabled(3);
 	delete dialog;
+}
+
+void TableEditor::setFilter()
+{
+	FilterDialog *dialog=new FilterDialog(0, tableIndex);
+	if(dialog->exec())
+	{
+		QString filterQuery=dialog->returnFilterString();
+		QString query=filterQuery;
+		query=query.toUtf8();
+		this->setCurrentQuery(&query, 1);
+	}
+	delete dialog;
+	std::vector<std::string> *vec=new std::vector<std::string>();
+	client->executeQuery(currentQuery.toAscii(), *vec);
+	emit reloadTable(vec);
+	delete vec;
 }
 
 TableEditor::~TableEditor()

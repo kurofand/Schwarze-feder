@@ -20,12 +20,18 @@ private:
 	Ui::MainWindow *ui;
 	TableEditor *tableEditor;
 	qint8 currentTable=-1;
+	static const uint8_t disableAll=0;
+	static const uint8_t enableSelect=1;
+	static const uint8_t enableFilter=2;
+	static const uint8_t enableAdd=3;
+	static const uint8_t enableEditDelete=4;
+	static const uint8_t disableEditDelete=5;
 
 private slots:
 	void on_pbRunSQL_clicked();
-	void on_pbFilter_clicked();
 public slots:
 	void buttonEnabled(uint8_t ind);
+	void close();
 
 signals:
 	void executeQuery(QString *query);
