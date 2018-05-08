@@ -75,6 +75,7 @@ EditDialog::EditDialog(QWidget *parent, uint8_t tabIndex, const char* record) :
 	{
 		dsbInd=new QDoubleSpinBox();
 		dsbInd->setMaximum(9999999);
+		dsbInd->setDecimals(5);
 		dsbInd->setValue(params.at(1).toDouble());
 		ui->formLayout->addRow("Convertion index", dsbInd);
 		chMainCurrency=new QCheckBox();

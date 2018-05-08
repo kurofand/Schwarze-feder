@@ -138,9 +138,16 @@
     <property name="title">
      <string>&amp;Menu</string>
     </property>
+    <addaction name="separator"/>
     <addaction name="aExit"/>
    </widget>
+   <widget class="QMenu" name="menuReports">
+    <property name="title">
+     <string>&amp;Reports</string>
+    </property>
+   </widget>
    <addaction name="menuMenu"/>
+   <addaction name="menuReports"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -152,6 +159,7 @@
    <addaction name="aSelect"/>
    <addaction name="aRefresh"/>
    <addaction name="aFilter"/>
+   <addaction name="aCurrency"/>
    <addaction name="aAdd"/>
    <addaction name="aEdit"/>
    <addaction name="aDelete"/>
@@ -213,7 +221,16 @@
   </action>
   <action name="aExit">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Exit</string>
+   </property>
+  </action>
+  <action name="aCurrency">
+   <property name="icon">
+    <iconset>
+     <normaloff>../Downloads/icons8-currency-exchange-52.png</normaloff>../Downloads/icons8-currency-exchange-52.png</iconset>
+   </property>
+   <property name="text">
+    <string>Change currency</string>
    </property>
   </action>
  </widget>

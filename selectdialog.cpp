@@ -6,7 +6,7 @@ SelectDialog::SelectDialog(QWidget *parent) :
 	ui(new Ui::SelectDialog)
 {
 	ui->setupUi(this);
-	for(uint8_t i=0;i<6;i++)
+	for(uint8_t i=0;i<boxMaxCount;i++)
 	{
 		boxes[i]=new QCheckBox();
 		ui->vlElements->addWidget(boxes[i]);
@@ -31,24 +31,27 @@ void SelectDialog::showBoxes(uint8_t boxCount)
 void SelectDialog::tableSelected(int index)
 {
 
-	for(uint8_t i=0;i<6;i++)
+	for(uint8_t i=0;i<boxMaxCount;i++)
 	{
 		boxes[i]->hide();
 		boxVis[i]=boxes[i]->isVisible();
 	}
 	switch(index)
 	{
+	//base viewer
 	case 0:
 	{
-		showBoxes(6);
+		showBoxes(boxMaxCount);
 		boxes[0]->setText("Name");
 		boxes[1]->setText("Value");
-		boxes[2]->setText("Description");
-		boxes[3]->setText("Date");
-		boxes[4]->setText("Category");
-		boxes[5]->setText("Shop");
+		boxes[2]->setText("Currency");
+		boxes[3]->setText("Description");
+		boxes[4]->setText("Date");
+		boxes[5]->setText("Category");
+		boxes[6]->setText("Shop");
 		break;
 	}
+	//expenses table
 	case 1:
 	{
 		showBoxes(4);
@@ -59,6 +62,7 @@ void SelectDialog::tableSelected(int index)
 		break;
 
 	}
+	//category table
 	case 2:
 	{
 		showBoxes(2);
@@ -66,12 +70,14 @@ void SelectDialog::tableSelected(int index)
 		boxes[1]->setText("Shop flag");
 		break;
 	}
+	//shop table
 	case 3:
 	{
 		showBoxes(1);
 		boxes[0]->setText("Name");
 		break;
 	}
+	//currency view
 	case 4:
 	{
 		showBoxes(3);
@@ -86,7 +92,7 @@ QStringList SelectDialog::returnParams()
 {
 	QStringList res;
 	res.append(QString::number(ui->cbTables->currentIndex()));
-	for(uint8_t i=0;i<6;i++)
+	for(uint8_t i=0;i<boxMaxCount;i++)
 	{
 		if(boxVis[i])
 			res.append(QString::fromAscii(boxes[i]->checkState()==0?"0":"1"));
@@ -97,7 +103,7 @@ QStringList SelectDialog::returnParams()
 SelectDialog::~SelectDialog()
 {
 	//массив удалить всем скопом нельзя, приходится грохать по одному
-	for(uint8_t i=0;i<6;i++)
+	for(uint8_t i=0;i<boxMaxCount;i++)
 		delete boxes[i];
 	delete ui;
 }

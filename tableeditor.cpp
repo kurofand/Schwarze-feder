@@ -5,6 +5,7 @@
 #include "selectdialog.h"
 #include "insertdialog.h"
 #include "filterdialog.h"
+#include "currencydialog.h"
 
 TableEditor::TableEditor(QTableWidget &widget, QObject *parent) :
 	QObject(parent)
@@ -74,23 +75,26 @@ void TableEditor::reloadTable(std::vector<std::string> *vec)
 					if(headers.at(i)=="val")
 						avHeaders.append("Price");
 					else
-						if(headers.at(i)=="date")
-							avHeaders.append("Date");
-						else
-							if(headers.at(i)=="categories.name")
-								avHeaders.append("Category");
+							if(headers.at(i)=="currency")
+								avHeaders.append("Currency");
 							else
-								if(headers.at(i)=="shops.name")
-									avHeaders.append("Shop");
+								if(headers.at(i)=="date")
+									avHeaders.append("Date");
 								else
-									if(headers.at(i)=="shopAvailable")
-										avHeaders.append("Shop flag");
+									if(headers.at(i)=="categories.name"||headers.at(i)=="category")
+										avHeaders.append("Category");
 									else
-										if(headers.at(i)=="ind")
-											avHeaders.append("Convesrion index");
+										if(headers.at(i)=="shops.name"||headers.at(i)=="shop")
+											avHeaders.append("Shop");
 										else
-											if(headers.at(i)=="mainFlag")
-												avHeaders.append("Main currency flag");
+											if(headers.at(i)=="shopAvailable")
+												avHeaders.append("Shop flag");
+											else
+												if(headers.at(i)=="ind")
+													avHeaders.append("Convesrion index");
+												else
+													if(headers.at(i)=="mainFlag")
+														avHeaders.append("Main currency flag");
 
 
 		QString str=QString::fromStdString(vec->at(i));
@@ -148,7 +152,10 @@ void TableEditor::setCurrentQuery(QString *part, uint8_t pos)
 		}
 		uint8_t last=parts.at(0).size()-1;
 		if(parts.at(0).at(last)==*" ")
-			currentQuery=parts.join("WHERE");
+			if(parts.at(1).at(0)!=*" ")
+				currentQuery=parts.join("WHERE ");
+			else
+				currentQuery=parts.join("WHERE");
 		else
 			currentQuery=parts.join(" WHERE ");
 
@@ -204,7 +211,7 @@ void TableEditor::insertTable()
 		}
 		case 3:
 		{
-			query.append("currency(name, ind, mainFlag) VALUES(");
+			query.append("vCurrency(name, ind, mainFlag) VALUES(");
 			for(uint8_t i=1;i<res.size();i++)
 				if(i!=res.size()-1)
 					query.append(res.at(i).split("|")[1]+", ");
@@ -293,7 +300,7 @@ void TableEditor::editTable()
 		}
 		case 4:
 		{
-			query.append("currency SET name=\""+res.at(0)+"\", ind="+res.at(1)+", mainFlag="+res.at(2));
+			query.append("vCurrency SET name=\""+res.at(0)+"\", ind="+res.at(1)+", mainFlag="+res.at(2));
 			break;
 		}
 		}
@@ -332,7 +339,7 @@ void TableEditor::deleteTable()
 	}
 	case 4:
 	{
-		table="currency";
+		table="vCurrency";
 		break;
 	}
 	}
@@ -358,10 +365,12 @@ void TableEditor::selectTable()
 		{
 		case 0:
 		{
-			str.replace(QString("##"), QString("expenses INNER JOIN categories, shops WHERE categories.id=categoryId AND shops.id=shopId"));
-			QString cols[]={"expenses.name", "val", "descr", "date", "categories.name", "shops.name"};
-			colsstr.prepend("expenses.");
-			for(uint8_t i=0;i<6;i++)
+			//str.replace(QString("##"), QString("expenses INNER JOIN categories, shops WHERE categories.id=categoryId AND shops.id=shopId"));
+			str.replace(QString("##"), QString("base"));
+			//QString cols[]={"expenses.name", "val", "descr", "date", "categories.name", "shops.name"};
+			QString cols[]={"name", "val", "currency", "descr", "date", "category", "shop"};
+			//colsstr.prepend("expenses.");
+			for(uint8_t i=0;i<7;i++)
 				if(res.at(i+1)=="1")
 					colsstr.append(cols[i]+", ");
 			uint8_t pos=colsstr.lastIndexOf(",");
@@ -418,6 +427,7 @@ void TableEditor::selectTable()
 	emit(setCurrentQuery(&str, 0));
 	emit buttonEnabled(2);
 	emit buttonEnabled(3);
+	emit buttonEnabled(6);
 	delete dialog;
 }
 
@@ -436,6 +446,42 @@ void TableEditor::setFilter()
 	client->executeQuery(currentQuery.toAscii(), *vec);
 	emit reloadTable(vec);
 	delete vec;
+}
+
+void TableEditor::setCurrency()
+{
+	std::vector<std::string> *vec=new std::vector<std::string>();
+//	QStringList *currency=new QStringList();
+	client->executeQuery("SELECT name, ind, mainFlag FROM vCurrency", *vec);
+/*	for(uint16_t i=0;i<vec->size();i++)
+	{
+		currency->append(vec->at(i).c_str());
+		currency->back()=currency->back().toAscii();
+	}*/
+	CurrencyDialog *dialog=new CurrencyDialog(0, vec);
+	if(dialog->exec())
+	{
+		std::vector<std::string> *vals=new std::vector<std::string>();
+		QString query="SELECT val, currencyId FROM expenses WHERE id IN (#)";
+		QString idStr;
+		for(uint16_t i=0;i<ids->size();i++)
+			idStr.append(QString::number(ids->at(i))+", ");
+		//удаляем последнюю запятую и пробел
+		idStr.chop(2);
+		query.replace(QString("#"), idStr);
+		client->executeQuery(query.toAscii(), *vals);
+		QStringList newVals=dialog->changeCurrency(vals);
+		uint8_t colInd;
+		for(colInd=0;colInd<table->columnCount();colInd++)
+			if(table->horizontalHeaderItem(colInd)->text()=="Price")
+				break;
+		for(uint16_t i=0;i<newVals.size();i++)
+			table->setItem(i,colInd,new QTableWidgetItem(newVals.at(i)));
+		delete vals;
+
+	}
+	delete vec;
+	delete dialog;
 }
 
 TableEditor::~TableEditor()

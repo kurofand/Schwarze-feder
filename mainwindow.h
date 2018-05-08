@@ -26,6 +26,7 @@ private:
 	static const uint8_t enableAdd=3;
 	static const uint8_t enableEditDelete=4;
 	static const uint8_t disableEditDelete=5;
+	static const uint8_t enableCurrency=6;
 
 private slots:
 	void on_pbRunSQL_clicked();

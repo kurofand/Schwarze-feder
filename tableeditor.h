@@ -39,6 +39,7 @@ public slots:
 	void insertTable();
 	void deleteTable();
 	void setFilter();
+	void setCurrency();
 
 private slots:
 	void enableEditDelete();

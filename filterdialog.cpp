@@ -273,11 +273,13 @@ QString FilterDialog::returnFilterString()
 			{
 				if(cbCols.at(i)->currentIndex()==3)
 					//res=res+"categories.";
-					resArr.append("categories.name");
+					//resArr.append("categories.name");
+					resArr.append("category");
 				else
 					if(cbCols.at(i)->currentIndex()==4)
 						//res=res+"shops.";
-						resArr.append("shops.name");
+						//resArr.append("shops.name");
+						resArr.append("shop");
 				//res=res+"name";
 					else
 						resArr.append("expenses.name");
@@ -403,11 +405,11 @@ QString FilterDialog::returnFilterString()
 	for(uint8_t i=0;i<logicArr.size();i++)
 		res=res+logicArr.at(i)+resArr.at(i+1);
 	//в случае базовой таблицы обязательно вносить в запрос проверку соответствия с другими таблицами
-	if(tIndex==0)
+	/*if(tIndex==0)
 	{
 		res.prepend(" categories.id=categoryId AND shops.id=shopId AND (");
 		res.append(")");
-	}
+	}*/
 	return res;
 }
 

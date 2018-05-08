@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include "selectdialog.h"
 #include "filterdialog.h"
-#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -24,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->aSelect, SIGNAL(triggered(bool)), tableEditor, SLOT(selectTable()));
 	connect(ui->aRefresh, SIGNAL(triggered(bool)), tableEditor, SLOT(refreshTable()));
 	connect(ui->aFilter, SIGNAL(triggered(bool)), tableEditor, SLOT(setFilter()));
+	connect(ui->aCurrency, SIGNAL(triggered(bool)), tableEditor, SLOT(setCurrency()));
 	connect(ui->aAdd, SIGNAL(triggered(bool)), tableEditor, SLOT(insertTable()));
 	connect(ui->aEdit, SIGNAL(triggered(bool)), tableEditor, SLOT(editTable()));
 	connect(ui->aDelete, SIGNAL(triggered(bool)), tableEditor, SLOT(deleteTable()));
@@ -48,7 +48,6 @@ void MainWindow::close()
 
 void MainWindow::buttonEnabled(uint8_t ind)
 {
-	//qDebug()<<"not connected";
 	switch(ind)
 	{
 	case disableAll:
@@ -56,6 +55,7 @@ void MainWindow::buttonEnabled(uint8_t ind)
 		ui->aSelect->setEnabled(false);
 		ui->aRefresh->setEnabled(false);
 		ui->aFilter->setEnabled(false);
+		ui->aCurrency->setEnabled(false);
 		ui->aAdd->setEnabled(false);
 		ui->aEdit->setEnabled(false);
 		ui->aDelete->setEnabled(false);
@@ -87,6 +87,11 @@ void MainWindow::buttonEnabled(uint8_t ind)
 	{
 		ui->aEdit->setEnabled(false);
 		ui->aDelete->setEnabled(false);
+		break;
+	}
+	case enableCurrency:
+	{
+		ui->aCurrency->setEnabled(true);
 		break;
 	}
 	}
