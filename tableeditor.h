@@ -40,6 +40,7 @@ public slots:
 	void deleteTable();
 	void setFilter();
 	void setCurrency();
+	void createMonthReport();
 
 private slots:
 	void enableEditDelete();

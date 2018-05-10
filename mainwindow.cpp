@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->aDelete, SIGNAL(triggered(bool)), tableEditor, SLOT(deleteTable()));
 	connect(ui->aExit, SIGNAL(triggered(bool)), this, SLOT(close()));
 
+	connect(ui->aMonth_report, SIGNAL(triggered(bool)), tableEditor, SLOT(createMonthReport()));
+
 	//tableEditor->clientConnect();
 	//интерфейсный костыль
 	ui->wSettings->setVisible(false);

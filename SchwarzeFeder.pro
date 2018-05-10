@@ -36,7 +36,8 @@ SOURCES += \
     filterdialog.cpp \
     editdialog.cpp \
     sqliteclient.cpp \
-    currencydialog.cpp
+    currencydialog.cpp \
+    reportdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -47,7 +48,8 @@ HEADERS += \
     filterdialog.h \
     editdialog.h \
     sqliteclient.hpp \
-    currencydialog.h
+    currencydialog.h \
+    reportdialog.h
 
 FORMS += \
         mainwindow.ui \
@@ -55,4 +57,5 @@ FORMS += \
     selectdialog.ui \
     filterdialog.ui \
     editdialog.ui \
-    currencydialog.ui
+    currencydialog.ui \
+    reportdialog.ui

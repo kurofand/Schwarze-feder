@@ -6,6 +6,8 @@
 #include "insertdialog.h"
 #include "filterdialog.h"
 #include "currencydialog.h"
+#include <fstream>
+#include "reportdialog.h"
 
 TableEditor::TableEditor(QTableWidget &widget, QObject *parent) :
 	QObject(parent)
@@ -481,6 +483,112 @@ void TableEditor::setCurrency()
 
 	}
 	delete vec;
+	delete dialog;
+}
+
+void TableEditor::createMonthReport()
+{
+	QStringList *params=new QStringList();
+	std::vector<std::string> *cat=new std::vector<std::string>();
+	client->executeQuery("SELECT name FROM categories", *cat);
+	for(uint8_t i=0;i<cat->size();i++)
+	{
+		QString buf=cat->at(i).c_str();
+		buf=buf.fromUtf8(buf.toAscii());
+		params->append(buf);
+	}
+	QString buf=params->join("|");
+	params->clear();
+	params->append(buf);
+	cat->clear();
+	client->executeQuery("SELECT name FROM currency", *cat);
+	buf.clear();
+	uint16_t catSize=cat->size();
+	for(uint8_t i=0;i<catSize;i++)
+		buf=buf+cat->at(i).c_str()+"|";
+	buf=buf.fromUtf8(buf.toAscii());
+	buf.chop(1);
+	params->append(buf);
+	delete cat;
+	ReportDialog *dialog=new ReportDialog(0, params);
+	delete params;
+	if(dialog->exec())
+	{
+		//QDataStream *returnedParams;
+		QDataStream returnedParams;
+		//*returnedParams<<dialog->returnParams();
+		returnedParams<<dialog->returnParams();
+		QDateTime date;
+		//date=new QDateTime();
+		returnedParams>>date;
+		uint8_t catStates[catSize];
+		for(uint16_t i=0;i<catSize;i++)
+			returnedParams>>catStates[i];
+		uint16_t currId;
+		returnedParams>>currId;
+		//delete date;
+	}
+
+
+	QStringList reportText;
+	reportText.append("<!DOCTYPE html>");
+	reportText.append("<meta charset=\"UTF-8\"/>");
+	double totalSum=0;
+	QDate date=QDate::currentDate();
+	QString mY=date.longMonthName(date.month())+" "+QString::number(date.year());
+	reportText.append("<h2>"+mY+"</h2>");
+	std::vector<std::string> *vec=new std::vector<std::string>();
+	client->executeQuery("SELECT name, shopAvailable FROM categories", *vec);
+	for(uint16_t i=0;i<vec->size();i++)
+	{
+		QString catName=vec->at(i).c_str();
+		uint8_t shop=catName.split("|")[1].toInt();
+		catName=catName.split("|")[0];
+		catName=catName.fromUtf8(catName.toAscii());
+		double sum=0;
+		reportText.append("<h4>"+catName+"</h4>");
+		std::vector<std::string> *t=new std::vector<std::string>();
+		QString query="SELECT name, val, date, descr# FROM base WHERE category=\""+catName+"\"";
+		if (shop==1)
+			query.replace(QString("#"), QString(", shop"));
+		else
+			query.replace(QString("#"), QString(""));
+		client->executeQuery(query.toAscii(), *t);
+		reportText.append("<table border=1>");
+		reportText.append("<tr>");
+		reportText.append("<th>Name</th>");
+		reportText.append("<th>Value</th>");
+		reportText.append("<th>Date</th>");
+		reportText.append("<th>Description</th>");
+		if(shop==1)
+			reportText.append("<th>Shop</th>");
+		reportText.append("</tr>");
+		for(uint16_t j=0;j<t->size();j++)
+		{
+			reportText.append("<tr>");
+			QString row=t->at(j).c_str();
+			row=row.fromUtf8(row.toAscii());
+			QStringList cells=row.split("|");
+			for(uint8_t k=0;k<cells.size();k++)
+			{
+				if(k==1)
+					sum=sum+cells.at(k).toDouble();
+				reportText.append("<td>"+cells.at(k)+"</td>");
+			}
+			reportText.append("</tr>");
+		}
+		reportText.append("</table>");
+		reportText.append("<h5>Sum: "+QString::number(sum)+"</h5><hr>");
+		totalSum=totalSum+sum;
+		delete t;
+	}
+	delete vec;
+	reportText.append("<h4>Total: "+QString::number(totalSum)+"</h4>");
+	std::ofstream file;
+	file.open(mY.toUtf8()+".html");
+	for(uint16_t i=0;i<reportText.size();i++)
+		file<<reportText.at(i).toUtf8().constData();
+	file.close();
 	delete dialog;
 }
 
