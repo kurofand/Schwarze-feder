@@ -8,6 +8,7 @@
 #include "currencydialog.h"
 #include <fstream>
 #include "reportdialog.h"
+#include "yearreport.h"
 
 TableEditor::TableEditor(QTableWidget &widget, QObject *parent) :
 	QObject(parent)
@@ -367,11 +368,8 @@ void TableEditor::selectTable()
 		{
 		case 0:
 		{
-			//str.replace(QString("##"), QString("expenses INNER JOIN categories, shops WHERE categories.id=categoryId AND shops.id=shopId"));
 			str.replace(QString("##"), QString("base"));
-			//QString cols[]={"expenses.name", "val", "descr", "date", "categories.name", "shops.name"};
 			QString cols[]={"name", "val", "currency", "descr", "date", "category", "shop"};
-			//colsstr.prepend("expenses.");
 			for(uint8_t i=0;i<7;i++)
 				if(res.at(i+1)=="1")
 					colsstr.append(cols[i]+", ");
@@ -453,13 +451,7 @@ void TableEditor::setFilter()
 void TableEditor::setCurrency()
 {
 	std::vector<std::string> *vec=new std::vector<std::string>();
-//	QStringList *currency=new QStringList();
 	client->executeQuery("SELECT name, ind, mainFlag FROM vCurrency", *vec);
-/*	for(uint16_t i=0;i<vec->size();i++)
-	{
-		currency->append(vec->at(i).c_str());
-		currency->back()=currency->back().toAscii();
-	}*/
 	CurrencyDialog *dialog=new CurrencyDialog(0, vec);
 	if(dialog->exec())
 	{
@@ -472,7 +464,13 @@ void TableEditor::setCurrency()
 		idStr.chop(2);
 		query.replace(QString("#"), idStr);
 		client->executeQuery(query.toAscii(), *vals);
-		QStringList newVals=dialog->changeCurrency(vals);
+		double *convertRes=new double[vals->size()];
+		uint8_t to=dialog->returnSelectedId();
+		this->convertTo(convertRes, vals, to);
+		QStringList newVals;
+		for(uint8_t i=0;i<vals->size();i++)
+			newVals.append(QString::number(convertRes[i]));
+		 /**/
 		uint8_t colInd;
 		for(colInd=0;colInd<table->columnCount();colInd++)
 			if(table->horizontalHeaderItem(colInd)->text()=="Price")
@@ -500,11 +498,12 @@ void TableEditor::createMonthReport()
 	QString buf=params->join("|");
 	params->clear();
 	params->append(buf);
+	uint16_t catSize=cat->size();
 	cat->clear();
 	client->executeQuery("SELECT name FROM currency", *cat);
 	buf.clear();
-	uint16_t catSize=cat->size();
-	for(uint8_t i=0;i<catSize;i++)
+
+	for(uint8_t i=0;i<cat->size();i++)
 		buf=buf+cat->at(i).c_str()+"|";
 	buf=buf.fromUtf8(buf.toAscii());
 	buf.chop(1);
@@ -512,83 +511,174 @@ void TableEditor::createMonthReport()
 	delete cat;
 	ReportDialog *dialog=new ReportDialog(0, params);
 	delete params;
+	QStringList returnedParams;
 	if(dialog->exec())
 	{
-		//QDataStream *returnedParams;
-		QDataStream returnedParams;
-		//*returnedParams<<dialog->returnParams();
-		returnedParams<<dialog->returnParams();
-		QDateTime date;
-		//date=new QDateTime();
-		returnedParams>>date;
+		returnedParams=dialog->returnParams();
+		QDate date;
+		date=QDate::fromString(returnedParams.at(0), "MMMM yyyy");
 		uint8_t catStates[catSize];
+		//тут ошибка в количестве категорий - их по какой-то причине 4 штуки
 		for(uint16_t i=0;i<catSize;i++)
-			returnedParams>>catStates[i];
-		uint16_t currId;
-		returnedParams>>currId;
-		//delete date;
-	}
-
-
-	QStringList reportText;
-	reportText.append("<!DOCTYPE html>");
-	reportText.append("<meta charset=\"UTF-8\"/>");
-	double totalSum=0;
-	QDate date=QDate::currentDate();
-	QString mY=date.longMonthName(date.month())+" "+QString::number(date.year());
-	reportText.append("<h2>"+mY+"</h2>");
-	std::vector<std::string> *vec=new std::vector<std::string>();
-	client->executeQuery("SELECT name, shopAvailable FROM categories", *vec);
-	for(uint16_t i=0;i<vec->size();i++)
-	{
-		QString catName=vec->at(i).c_str();
-		uint8_t shop=catName.split("|")[1].toInt();
-		catName=catName.split("|")[0];
-		catName=catName.fromUtf8(catName.toAscii());
-		double sum=0;
-		reportText.append("<h4>"+catName+"</h4>");
-		std::vector<std::string> *t=new std::vector<std::string>();
-		QString query="SELECT name, val, date, descr# FROM base WHERE category=\""+catName+"\"";
-		if (shop==1)
-			query.replace(QString("#"), QString(", shop"));
-		else
-			query.replace(QString("#"), QString(""));
-		client->executeQuery(query.toAscii(), *t);
-		reportText.append("<table border=1>");
-		reportText.append("<tr>");
-		reportText.append("<th>Name</th>");
-		reportText.append("<th>Value</th>");
-		reportText.append("<th>Date</th>");
-		reportText.append("<th>Description</th>");
-		if(shop==1)
-			reportText.append("<th>Shop</th>");
-		reportText.append("</tr>");
-		for(uint16_t j=0;j<t->size();j++)
+			catStates[i]=(returnedParams.at(1).at(i).toAscii()==*"0"?0:1);
+		uint16_t currId=returnedParams.at(2).toInt();
+		QStringList reportText;
+		reportText.append("<!DOCTYPE html>");
+		reportText.append("<meta charset=\"UTF-8\"/>");
+		double totalSum=0;
+		reportText.append(date.toString("MMMM yyyy"));
+		std::vector<std::string> *vec=new std::vector<std::string>();
+		QString catIds;
+		for(uint16_t i=0;i<catSize;i++)
 		{
-			reportText.append("<tr>");
-			QString row=t->at(j).c_str();
-			row=row.fromUtf8(row.toAscii());
-			QStringList cells=row.split("|");
-			for(uint8_t k=0;k<cells.size();k++)
-			{
-				if(k==1)
-					sum=sum+cells.at(k).toDouble();
-				reportText.append("<td>"+cells.at(k)+"</td>");
-			}
-			reportText.append("</tr>");
+			if(catStates[i])
+				catIds.append(QString::number(i+1)+", ");
+
 		}
-		reportText.append("</table>");
-		reportText.append("<h5>Sum: "+QString::number(sum)+"</h5><hr>");
-		totalSum=totalSum+sum;
-		delete t;
+		catIds.chop(2);
+		client->executeQuery("SELECT name, shopAvailable FROM categories WHERE id IN ("+catIds.toAscii()+")", *vec);
+		for(uint16_t i=0;i<vec->size();i++)
+		{
+			QString catName=vec->at(i).c_str();
+			uint8_t shop=catName.split("|")[1].toInt();
+			catName=catName.split("|")[0];
+			catName=catName.fromUtf8(catName.toAscii());
+			double sum=0;
+			reportText.append("<h4>"+catName+"</h4>");
+			std::vector<std::string> *t=new std::vector<std::string>();
+			QString query="SELECT id, name, val, date, descr# FROM base WHERE category=\""+catName+"\" AND strftime(\"%m %Y\", date)=\""+date.toString("MM yyyy")+"\"";
+			if(shop==1)
+				query.replace(QString("#"), QString(", shop"));
+			else
+				query.replace(QString("#"), QString(""));
+			client->executeQuery(query.toAscii(), *t);
+			reportText.append("<table border=1>");
+			reportText.append("<tr>");
+			reportText.append("<th>Name</th>");
+			reportText.append("<th>Value</th>");
+			reportText.append("<th>Date</th>");
+			reportText.append("<th>Description</th>");
+			if(shop==1)
+				reportText.append("<th>Shop</th>");
+			reportText.append("</tr>");
+			for(uint16_t j=0;j<t->size();j++)
+			{
+				reportText.append("<tr>");
+				QString row=t->at(j).c_str();
+				row=row.fromUtf8(row.toAscii());
+				QStringList cells=row.split("|");
+				//игнорируем столбец с ид
+				for(uint8_t k=1;k<cells.size();k++)
+				{
+					if(k==2)
+					{
+						double *convertResult=new double();
+						std::vector<std::string> *curr=new std::vector<std::string>();
+						std::vector<std::string> *currentCurrencyId=new std::vector<std::string>();
+						client->executeQuery("SELECT currencyId FROM expenses WHERE id="+cells.at(0).toAscii(), *currentCurrencyId);
+
+						curr->push_back(cells.at(k).toStdString());
+						curr->at(0).push_back(*"|");
+						curr->at(0).push_back(*currentCurrencyId->at(0).c_str());
+						convertTo(convertResult, curr, currId);
+						cells[k]=QString::number(*convertResult);
+						sum=sum+cells.at(k).toDouble();
+						delete currentCurrencyId;
+						delete curr;
+						delete convertResult;
+					}
+					reportText.append("<td>"+cells.at(k)+"</td>");
+				}
+				reportText.append("</tr>");
+			}
+			reportText.append("</table>");
+			reportText.append("<h5>Sum: "+QString::number(sum)+"</h5><hr>");
+			totalSum=totalSum+sum;
+			delete t;
+		}
+		delete vec;
+		reportText.append("<h4>Total: "+QString::number(totalSum)+"</h4>");
+
+		std::ofstream file;
+		file.open(date.toString("MMMM yyyy").toUtf8()+".html");
+		for(uint16_t i=0;i<reportText.size();i++)
+			file<<reportText.at(i).toUtf8().constData();
+		file.close();
 	}
-	delete vec;
-	reportText.append("<h4>Total: "+QString::number(totalSum)+"</h4>");
-	std::ofstream file;
-	file.open(mY.toUtf8()+".html");
-	for(uint16_t i=0;i<reportText.size();i++)
-		file<<reportText.at(i).toUtf8().constData();
-	file.close();
+	delete dialog;
+}
+
+void TableEditor::convertTo(double *result, std::vector<std::string> *vals, uint16_t to)
+{
+	std::vector<std::string> *queryRes=new std::vector<std::string>();
+	client->executeQuery("SELECT ind FROM currency", *queryRes);
+	double indexes[queryRes->size()];
+	double *currs=new double[vals->size()];
+	uint8_t currIds[vals->size()];
+	for(uint16_t i=0;i<queryRes->size();i++)
+	{
+		QString buf=QString::fromStdString(queryRes->at(i));
+		indexes[i]=buf.toDouble();
+	}
+	for(uint16_t i=0;i<vals->size();i++)
+	{
+		QString buf=vals->at(i).c_str();
+		buf=buf.split("|")[0];
+		currs[i]=buf.toDouble();
+		buf=vals->at(i).c_str();
+		buf=buf.split("|")[1];
+		currIds[i]=buf.toInt();
+	}
+	double resIndex=indexes[to];
+	for(uint16_t i=0;i<vals->size();i++)
+		if(currIds[i]!=to+1)
+			currs[i]=indexes[currIds[i]-1]/resIndex*currs[i];
+	for(uint8_t i=0;i<vals->size();i++)
+		result[i]=currs[i];
+	delete currs;
+	delete queryRes;
+
+}
+
+void TableEditor::createYearReport()
+{
+	QStringList *params=new QStringList();
+	std::vector<std::string> *cat=new std::vector<std::string>();
+	client->executeQuery("SELECT name FROM categories", *cat);
+	for(uint8_t i=0;i<cat->size();i++)
+	{
+		QString buf=cat->at(i).c_str();
+		buf=buf.fromUtf8(buf.toAscii());
+		params->append(buf);
+	}
+	QString buf=params->join("|");
+	params->clear();
+	params->append(buf);
+	//uint16_t catSize=cat->size();
+	cat->clear();
+	client->executeQuery("SELECT name FROM currency", *cat);
+	buf.clear();
+
+	for(uint8_t i=0;i<cat->size();i++)
+		buf=buf+cat->at(i).c_str()+"|";
+	buf=buf.fromUtf8(buf.toAscii());
+	buf.chop(1);
+	params->append(buf);
+	delete cat;
+
+	ReportDialog *dialog=new ReportDialog(0,params,1);
+	delete params;
+	QStringList returnedParams;
+	if(dialog->exec())
+	{
+		returnedParams=dialog->returnParams();
+		YearReport *report=new YearReport();
+		if(report->exec())
+		{
+
+		}
+		delete report;
+	}
 	delete dialog;
 }
 

@@ -27,6 +27,7 @@ private:
 	uint8_t tableIndex;
 	void reloadTable(std::vector<std::string> *vec);
 	uint16_t getSelectedId();
+	void convertTo(double *result, std::vector<std::string> *vals, uint16_t to);
 
 public slots:
 	void executeQuery(QString *query);
@@ -41,6 +42,7 @@ public slots:
 	void setFilter();
 	void setCurrency();
 	void createMonthReport();
+	void createYearReport();
 
 private slots:
 	void enableEditDelete();

@@ -1,7 +1,7 @@
 #include "reportdialog.h"
 #include "ui_reportdialog.h"
 
-ReportDialog::ReportDialog(QWidget *parent, const QStringList *params) :
+ReportDialog::ReportDialog(QWidget *parent, const QStringList *params, bool year) :
 	QDialog(parent),
 	ui(new Ui::ReportDialog)
 {
@@ -22,34 +22,27 @@ ReportDialog::ReportDialog(QWidget *parent, const QStringList *params) :
 	cbCurrency=new QComboBox(this);
 	cbCurrency->addItems(*currency);
 	ui->formLayout->addRow("Currency", cbCurrency);
-}
-/*
-QDataStream &ReportDialog::returnParams()
-{
-	QByteArray block;
-	//QDataStream res(block, QIODevice::WriteOnly);
-	dialogResult=new QDataStream(block, QIODevice::WriteOnly);
-	dialogResult<<ui->deMonth->date();
-	for(uint16_t i=0;i<categories->size();i++)
-		dialogResult<<(cBoxes[i].checkState()==0?0:1);
-	dialogResult<<cbCurrency->currentIndex();
-
-	return &dialogResult;
-}*/
-
-QDataStream ReportDialog::returnParams()
-{
-	QByteArray block;
-	QDataStream res(&block, QIODevice::WriteOnly);
-	return res;
+	if(year)
+		ui->deMonth->setDisplayFormat("yyyy");
 }
 
-/*QStringList ReportDialog::returnParams()
+
+QStringList ReportDialog::returnParams()
 {
 	QStringList res;
+	QDate date;
+	date=date.fromString(ui->deMonth->text(), "MMMM yyyy");
+	//res.append(ui->deMonth->text());
+	res.append(date.toString("MMMM yyyy"));
+	//res.append(date.toString("dd MM yyyy"));
+	QString buf;
+	for(uint16_t i=0;i<categories->size();i++)
+		buf=buf+(cBoxes[i].checkState()==0?"0":"1");
+	res.append(buf);
+	res.append(QString::number(cbCurrency->currentIndex()));
 	return res;
 
-}*/
+}
 
 ReportDialog::~ReportDialog()
 {

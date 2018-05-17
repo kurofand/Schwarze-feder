@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	connect(ui->aMonth_report, SIGNAL(triggered(bool)), tableEditor, SLOT(createMonthReport()));
 
+	connect(ui->aYearReport, SIGNAL(triggered(bool)), tableEditor, SLOT(createYearReport()));
+
 	//tableEditor->clientConnect();
 	//интерфейсный костыль
 	ui->wSettings->setVisible(false);

@@ -35,7 +35,7 @@ QStringList CurrencyDialog::changeCurrency(std::vector<std::string> *vals)
 	uint8_t resCol=ui->cbCurrency->currentIndex();
 	double resIndex=indexes->at(resCol);
 	for(uint16_t i=0;i<vals->size();i++)
-		if(currIds[i]!=resIndex)
+		if(currIds[i]!=resCol+1)
 		{
 			currs[i]=indexes->at(currIds[i]-1)/resIndex*currs[i];
 		}
@@ -44,6 +44,12 @@ QStringList CurrencyDialog::changeCurrency(std::vector<std::string> *vals)
 		res.append(QString::number(currs[i]));
 	return res;
 
+}
+
+uint8_t CurrencyDialog::returnSelectedId()
+{
+	uint8_t res=ui->cbCurrency->currentIndex();
+	return res;
 }
 
 CurrencyDialog::~CurrencyDialog()

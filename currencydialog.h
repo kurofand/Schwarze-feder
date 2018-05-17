@@ -14,6 +14,7 @@ class CurrencyDialog : public QDialog
 public:
 	explicit CurrencyDialog(QWidget *parent = 0, std::vector<std::string> *vec=nullptr);
 	QStringList changeCurrency(std::vector<std::string> *vals);
+	uint8_t returnSelectedId();
 	~CurrencyDialog();
 
 private:

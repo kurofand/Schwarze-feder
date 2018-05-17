@@ -14,10 +14,10 @@ class ReportDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit ReportDialog(QWidget *parent = 0, const QStringList *params=nullptr);
+	explicit ReportDialog(QWidget *parent = 0, const QStringList *params=nullptr, bool year=false);
 	//QDataStream &returnParams();
-	QDataStream returnParams();
-	//QStringList returnParams();
+	//QDataStream returnParams();
+	QStringList returnParams();
 	~ReportDialog();
 
 private:
