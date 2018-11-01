@@ -8,10 +8,10 @@ EditDialog::EditDialog(QWidget *parent, uint8_t tabIndex, const char* record) :
 {
 	ui->setupUi(this);
 	this->tabIndex=tabIndex;
-	QString paramStr=QString::fromAscii(record);
+	QString paramStr=QString::fromLatin1(record);
 	QStringList params=paramStr.split("|");
 	for(uint8_t i=0;i<params.size();i++)
-		params[i]=QString::fromUtf8(params[i].toAscii());
+		params[i]=QString::fromUtf8(params[i].toLatin1());
 	//необходимость этих преобразований скрыта от меня, но без этого он выводи крокозябры - видимо не умеет работать с юникодом
 	//ui->leName->setText(QString::fromUtf8(params.at(0).toAscii()));
 	ui->leName->setText(params.at(0));
@@ -39,7 +39,7 @@ EditDialog::EditDialog(QWidget *parent, uint8_t tabIndex, const char* record) :
 		client->executeQuery("SELECT name FROM categories", *vec);
 		QStringList categories;
 		for(uint16_t i=0;i<vec->size();i++)
-			categories.append(QString::fromUtf8(QString::fromStdString(vec->at(i)).toAscii()));
+			categories.append(QString::fromUtf8(QString::fromStdString(vec->at(i)).toLatin1()));
 		cbCategory->addItems(categories);
 		uint16_t i=0;
 		while(categories.at(i)!=params.at(4))
@@ -96,7 +96,7 @@ void EditDialog::createCbShop()
 	std::vector<std::string> *vec=new std::vector<std::string>();
 	client->executeQuery("SELECT name FROM shops", *vec);
 	for(uint16_t i=0;i<vec->size();i++)
-		list.append(QString::fromUtf8(QString::fromStdString(vec->at(i)).toAscii()));
+		list.append(QString::fromUtf8(QString::fromStdString(vec->at(i)).toLatin1()));
 	delete vec;
 	client->closeConnection();
 	delete client;

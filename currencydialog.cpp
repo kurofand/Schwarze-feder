@@ -11,7 +11,7 @@ CurrencyDialog::CurrencyDialog(QWidget *parent, std::vector<std::string> *vec) :
 	for(uint16_t i=0;i<vec->size();i++)
 	{
 		QString buf=vec->at(i).c_str();
-		buf=buf.fromUtf8(buf.toAscii());
+		buf=buf.fromUtf8(buf.toLatin1());
 		names.append(buf.split("|")[0]);
 		indexes->push_back(buf.split("|")[1].toDouble());
 	}

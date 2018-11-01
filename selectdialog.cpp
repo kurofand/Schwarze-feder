@@ -95,7 +95,7 @@ QStringList SelectDialog::returnParams()
 	for(uint8_t i=0;i<boxMaxCount;i++)
 	{
 		if(boxVis[i])
-			res.append(QString::fromAscii(boxes[i]->checkState()==0?"0":"1"));
+			res.append(QString::fromLatin1(boxes[i]->checkState()==0?"0":"1"));
 	}
 	return res;
 }

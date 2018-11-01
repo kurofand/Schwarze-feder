@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	//tableEditor->clientConnect();
 	//интерфейсный костыль
 	ui->wSettings->setVisible(false);
-	ui->statusBar->showMessage(QString::fromAscii("Connection status: ")+QString::fromAscii(tableEditor->clientConnect()?"connected":"disconnected"));
+	ui->statusBar->showMessage(QString::fromLatin1("Connection status: ")+QString::fromLatin1(tableEditor->clientConnect()?"connected":"disconnected"));
 }
 void MainWindow::on_pbRunSQL_clicked()
 {

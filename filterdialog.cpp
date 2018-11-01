@@ -383,7 +383,7 @@ QString FilterDialog::returnFilterString()
 					for(uint8_t k=0;k<chCheck.size();k++)
 						if(child->widget()==chCheck.at(k))
 						{
-							resArr.back().append(QString::fromAscii(chCheck.at(k)->checkState()?"=1":"=0"));
+							resArr.back().append(QString::fromLatin1(chCheck.at(k)->checkState()?"=1":"=0"));
 							break;
 						}
 				}

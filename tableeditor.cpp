@@ -101,7 +101,7 @@ void TableEditor::reloadTable(std::vector<std::string> *vec)
 
 
 		QString str=QString::fromStdString(vec->at(i));
-		str=str.fromUtf8(str.toAscii());
+		str=str.fromUtf8(str.toLatin1());
 		QStringList row=str.split("|");
 		if(table->colorCount()!=row.size())
 			table->setColumnCount(row.size());
@@ -115,7 +115,7 @@ void TableEditor::reloadTable(std::vector<std::string> *vec)
 void TableEditor::executeQuery(QString *query)
 {
 	std::vector<std::string> *vec=new std::vector<std::string>();
-	bool res=client->executeQuery(query->toAscii(), *vec);
+	bool res=client->executeQuery(query->toLatin1(), *vec);
 	if(res)
 	{
 		currentQuery=*query;
@@ -276,7 +276,7 @@ void TableEditor::editTable()
 	}
 	}
 	query.append(QString::number(id));
-	client->executeQuery(query.toAscii(), *vec);
+	client->executeQuery(query.toLatin1(), *vec);
 	//поскольку фильтруем по уникальному ид можно смело брать нулевой элемент
 	EditDialog *dialog=new EditDialog(0, tableIndex, vec->at(0).c_str());
 	if(dialog->exec())
@@ -348,7 +348,7 @@ void TableEditor::deleteTable()
 	}
 	query.replace(QString("#"), table);
 	std::vector<std::string> *vec=new std::vector<std::string>();
-	client->executeQuery(query.toAscii(), *vec);
+	client->executeQuery(query.toLatin1(), *vec);
 	delete vec;
 	currentQuery=oldQuery;
 	emit(refreshTable());
@@ -443,7 +443,7 @@ void TableEditor::setFilter()
 	}
 	delete dialog;
 	std::vector<std::string> *vec=new std::vector<std::string>();
-	client->executeQuery(currentQuery.toAscii(), *vec);
+	client->executeQuery(currentQuery.toLatin1(), *vec);
 	emit reloadTable(vec);
 	delete vec;
 }
@@ -463,7 +463,7 @@ void TableEditor::setCurrency()
 		//удаляем последнюю запятую и пробел
 		idStr.chop(2);
 		query.replace(QString("#"), idStr);
-		client->executeQuery(query.toAscii(), *vals);
+		client->executeQuery(query.toLatin1(), *vals);
 		double *convertRes=new double[vals->size()];
 		uint8_t to=dialog->returnSelectedId();
 		this->convertTo(convertRes, vals, to);
@@ -492,7 +492,7 @@ void TableEditor::createMonthReport()
 	for(uint8_t i=0;i<cat->size();i++)
 	{
 		QString buf=cat->at(i).c_str();
-		buf=buf.fromUtf8(buf.toAscii());
+		buf=buf.fromUtf8(buf.toLatin1());
 		params->append(buf);
 	}
 	QString buf=params->join("|");
@@ -505,7 +505,7 @@ void TableEditor::createMonthReport()
 
 	for(uint8_t i=0;i<cat->size();i++)
 		buf=buf+cat->at(i).c_str()+"|";
-	buf=buf.fromUtf8(buf.toAscii());
+	buf=buf.fromUtf8(buf.toLatin1());
 	buf.chop(1);
 	params->append(buf);
 	delete cat;
@@ -520,7 +520,7 @@ void TableEditor::createMonthReport()
 		uint8_t catStates[catSize];
 		//тут ошибка в количестве категорий - их по какой-то причине 4 штуки
 		for(uint16_t i=0;i<catSize;i++)
-			catStates[i]=(returnedParams.at(1).at(i).toAscii()==*"0"?0:1);
+			catStates[i]=(returnedParams.at(1).at(i).toLatin1()==*"0"?0:1);
 		uint16_t currId=returnedParams.at(2).toInt();
 		QStringList reportText;
 		reportText.append("<!DOCTYPE html>");
@@ -536,13 +536,13 @@ void TableEditor::createMonthReport()
 
 		}
 		catIds.chop(2);
-		client->executeQuery("SELECT name, shopAvailable FROM categories WHERE id IN ("+catIds.toAscii()+")", *vec);
+		client->executeQuery("SELECT name, shopAvailable FROM categories WHERE id IN ("+catIds.toLatin1()+")", *vec);
 		for(uint16_t i=0;i<vec->size();i++)
 		{
 			QString catName=vec->at(i).c_str();
 			uint8_t shop=catName.split("|")[1].toInt();
 			catName=catName.split("|")[0];
-			catName=catName.fromUtf8(catName.toAscii());
+			catName=catName.fromUtf8(catName.toLatin1());
 			double sum=0;
 			reportText.append("<h4>"+catName+"</h4>");
 			std::vector<std::string> *t=new std::vector<std::string>();
@@ -551,7 +551,7 @@ void TableEditor::createMonthReport()
 				query.replace(QString("#"), QString(", shop"));
 			else
 				query.replace(QString("#"), QString(""));
-			client->executeQuery(query.toAscii(), *t);
+			client->executeQuery(query.toLatin1(), *t);
 			reportText.append("<table border=1>");
 			reportText.append("<tr>");
 			reportText.append("<th>Name</th>");
@@ -565,7 +565,7 @@ void TableEditor::createMonthReport()
 			{
 				reportText.append("<tr>");
 				QString row=t->at(j).c_str();
-				row=row.fromUtf8(row.toAscii());
+				row=row.fromUtf8(row.toLatin1());
 				QStringList cells=row.split("|");
 				//игнорируем столбец с ид
 				for(uint8_t k=1;k<cells.size();k++)
@@ -575,7 +575,7 @@ void TableEditor::createMonthReport()
 						double *convertResult=new double();
 						std::vector<std::string> *curr=new std::vector<std::string>();
 						std::vector<std::string> *currentCurrencyId=new std::vector<std::string>();
-						client->executeQuery("SELECT currencyId FROM expenses WHERE id="+cells.at(0).toAscii(), *currentCurrencyId);
+						client->executeQuery("SELECT currencyId FROM expenses WHERE id="+cells.at(0).toLatin1(), *currentCurrencyId);
 
 						curr->push_back(cells.at(k).toStdString());
 						curr->at(0).push_back(*"|");
@@ -648,7 +648,7 @@ void TableEditor::createYearReport()
 	for(uint8_t i=0;i<cat->size();i++)
 	{
 		QString buf=cat->at(i).c_str();
-		buf=buf.fromUtf8(buf.toAscii());
+		buf=buf.fromUtf8(buf.toLatin1());
 		params->append(buf);
 	}
 	QString buf=params->join("|");
@@ -661,7 +661,7 @@ void TableEditor::createYearReport()
 
 	for(uint8_t i=0;i<cat->size();i++)
 		buf=buf+cat->at(i).c_str()+"|";
-	buf=buf.fromUtf8(buf.toAscii());
+	buf=buf.fromUtf8(buf.toLatin1());
 	buf.chop(1);
 	params->append(buf);
 	delete cat;
@@ -669,7 +669,7 @@ void TableEditor::createYearReport()
 	ReportDialog *dialog=new ReportDialog(0,params,1);
 	delete params;
 	QStringList returnedParams;
-	if(dialog->exec())
+/*	if(dialog->exec())
 	{
 		returnedParams=dialog->returnParams();
 		YearReport *report=new YearReport();
@@ -678,6 +678,11 @@ void TableEditor::createYearReport()
 
 		}
 		delete report;
+	}*/
+	YearReport *report=new YearReport();
+	if(report->exec())
+	{
+
 	}
 	delete dialog;
 }

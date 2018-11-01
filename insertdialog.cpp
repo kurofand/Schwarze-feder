@@ -99,7 +99,7 @@ void InsertDialog::selectTable(int index)
 			for(uint16_t i=0;i<vec->size();i++)
 			{
 				QString str=QString::fromStdString(vec->at(i));
-				str=str.fromUtf8(str.toAscii());
+				str=str.fromUtf8(str.toLatin1());
 				list.append(str);
 			}
 			cbCurrency->addItems(list);
@@ -160,7 +160,7 @@ void InsertDialog::selectTable(int index)
 				for(uint8_t i=0;i<vec->size();i++)
 				{
 					QString str=QString::fromStdString(vec->at(i));
-					str=str.fromUtf8(str.toAscii());
+					str=str.fromUtf8(str.toLatin1());
 					list.append(str);
 				}
 				cbCategory->addItems(list);
@@ -264,7 +264,7 @@ void InsertDialog::selectCategory(QString text)
 				for(uint16_t i=0;i<vec->size();i++)
 				{
 					QString str=QString::fromStdString(vec->at(i));
-					str=str.fromUtf8(str.toAscii());
+					str=str.fromUtf8(str.toLatin1());
 					shops.append(str);
 				}
 				cbShop->addItems(shops);
@@ -313,13 +313,13 @@ QStringList InsertDialog::returnParams()
 	}
 	case 1:
 	{
-		result.append("shopAvailable|"+QString::fromAscii(chbShopAvailable->checkState()==0?"0":"1"));
+		result.append("shopAvailable|"+QString::fromLatin1(chbShopAvailable->checkState()==0?"0":"1"));
 		break;
 	}
 	case 3:
 	{
 		result.append("ind|"+QString::number(dsbIndex->value()));
-		result.append("mainFlag|"+QString::fromAscii(chbMain->checkState()==0?"0":"1"));
+		result.append("mainFlag|"+QString::fromLatin1(chbMain->checkState()==0?"0":"1"));
 		break;
 	}
 	}
