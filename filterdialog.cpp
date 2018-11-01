@@ -7,6 +7,8 @@ FilterDialog::FilterDialog(QWidget *parent, uint8_t tableIndex) :
 {
 	ui->setupUi(this);
 	tIndex=tableIndex;
+	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+
 }
 
 
@@ -57,6 +59,8 @@ void FilterDialog::on_pbAdd_clicked()
 	}
 	}
 	connect(cbCols.back(), SIGNAL(currentIndexChanged(int)), this, SLOT(selectCol(int)));
+	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+	filterCount++;
 }
 //пока так, потом править
 void FilterDialog::deleteFilter()
@@ -120,6 +124,8 @@ void FilterDialog::deleteFilter()
 			delete filterLayouts.at(i);
 			filterLayouts.removeAt(i);
 		}
+	if(--filterCount==0)
+		ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 }
 
 void FilterDialog::selectCol(int index)
@@ -401,6 +407,7 @@ QString FilterDialog::returnFilterString()
 		}
 		}
 	}
+
 	res+=resArr.at(0);
 	for(uint8_t i=0;i<logicArr.size();i++)
 		res=res+logicArr.at(i)+resArr.at(i+1);

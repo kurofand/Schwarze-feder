@@ -37,6 +37,7 @@ private:
 	QList<QDateEdit *> deDates;
 	QList<QCheckBox *> chCheck;
 	uint8_t tIndex=0;
+	uint8_t filterCount=0;
 	void deleteElements(QList<QWidget *> *list);
 private slots:
 	void on_pbAdd_clicked();
