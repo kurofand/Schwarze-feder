@@ -16,7 +16,9 @@ TableEditor::TableEditor(QTableWidget &widget, QObject *parent) :
 	client=new SqliteClient("SchwarzeFeder.db");
 	table=&widget;
 	ids=new QList<uint32_t>;
-	connect(table, SIGNAL(cellActivated(int,int)), this, SLOT(enableEditDelete()));
+	//connect(table, SIGNAL(cellActivated(int,int)), this, SLOT(enableEditDelete()));
+	//cellActivated требует двойной клик, тому заменил на cellClicked
+	connect(table, SIGNAL(cellClicked(int,int)), this, SLOT(enableEditDelete()));
 }
 
 void TableEditor::enableEditDelete()
