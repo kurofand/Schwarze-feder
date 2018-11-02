@@ -30,7 +30,7 @@ bool SqliteClient::executeQuery(const char* query, std::vector<std::string> &res
 		queryType+=query[i++];
 	if(queryType=="SELECT")
 	{
-		std::vector<std::string> *selectRes=new std::vector<std::string>();
+		auto *selectRes=new std::vector<std::string>();
 		sqlite3_stmt *stmt;
 		sqlite3_prepare_v2(db, query, -1, &stmt, NULL);
 		uint8_t colCount=sqlite3_column_count(stmt);

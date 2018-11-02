@@ -43,7 +43,7 @@ void TableEditor::setTable(QTableWidget &widget)
 	this->table=new QTableWidget(&widget);
 }
 
-void TableEditor::reloadTable(std::vector<std::string> *vec)
+void TableEditor::reloadTable(auto *vec)
 {
 	if(vec->size()==0)
 		emit buttonEnabled(5);
@@ -114,7 +114,7 @@ void TableEditor::reloadTable(std::vector<std::string> *vec)
 
 void TableEditor::executeQuery(QString *query)
 {
-	std::vector<std::string> *vec=new std::vector<std::string>();
+	auto *vec=new std::vector<std::string>();
 	bool res=client->executeQuery(query->toLatin1(), *vec);
 	if(res)
 	{
@@ -223,7 +223,7 @@ void TableEditor::insertTable()
 			break;
 		}
 		}
-		std::vector<std::string> *vec=new std::vector<std::string>();
+		auto *vec=new std::vector<std::string>();
 		client->executeQuery(query.toUtf8(), *vec);
 		delete vec;
 	}
@@ -246,7 +246,7 @@ void TableEditor::editTable()
 	uint16_t id=this->getSelectedId();
 	//сюды надо перенести как-то активную таблицу
 	//активная таблица в классовом таблеиндексе
-	std::vector<std::string> *vec=new std::vector<std::string>();
+	auto *vec=new std::vector<std::string>();
 	QString query="SELECT ", oldQuery=currentQuery;
 	switch(tableIndex)
 	{
@@ -347,7 +347,7 @@ void TableEditor::deleteTable()
 	}
 	}
 	query.replace(QString("#"), table);
-	std::vector<std::string> *vec=new std::vector<std::string>();
+	auto *vec=new std::vector<std::string>();
 	client->executeQuery(query.toLatin1(), *vec);
 	delete vec;
 	currentQuery=oldQuery;
@@ -437,12 +437,15 @@ void TableEditor::setFilter()
 	if(dialog->exec())
 	{
 		QString filterQuery=dialog->returnFilterString();
-		QString query=filterQuery;
-		query=query.toUtf8();
-		this->setCurrentQuery(&query, 1);
+		if(filterQuery!="")
+		{
+			QString query=filterQuery;
+			query=query.toUtf8();
+			this->setCurrentQuery(&query, 1);
+		}
 	}
 	delete dialog;
-	std::vector<std::string> *vec=new std::vector<std::string>();
+	auto *vec=new std::vector<std::string>();
 	client->executeQuery(currentQuery.toLatin1(), *vec);
 	emit reloadTable(vec);
 	delete vec;
@@ -450,12 +453,12 @@ void TableEditor::setFilter()
 
 void TableEditor::setCurrency()
 {
-	std::vector<std::string> *vec=new std::vector<std::string>();
+	auto *vec=new std::vector<std::string>();
 	client->executeQuery("SELECT name, ind, mainFlag FROM vCurrency", *vec);
 	CurrencyDialog *dialog=new CurrencyDialog(0, vec);
 	if(dialog->exec())
 	{
-		std::vector<std::string> *vals=new std::vector<std::string>();
+		auto *vals=new std::vector<std::string>();
 		QString query="SELECT val, currencyId FROM expenses WHERE id IN (#)";
 		QString idStr;
 		for(uint16_t i=0;i<ids->size();i++)
@@ -487,7 +490,7 @@ void TableEditor::setCurrency()
 void TableEditor::createMonthReport()
 {
 	QStringList *params=new QStringList();
-	std::vector<std::string> *cat=new std::vector<std::string>();
+	auto *cat=new std::vector<std::string>();
 	client->executeQuery("SELECT name FROM categories", *cat);
 	for(uint8_t i=0;i<cat->size();i++)
 	{
@@ -527,7 +530,7 @@ void TableEditor::createMonthReport()
 		reportText.append("<meta charset=\"UTF-8\"/>");
 		double totalSum=0;
 		reportText.append(date.toString("MMMM yyyy"));
-		std::vector<std::string> *vec=new std::vector<std::string>();
+		auto *vec=new std::vector<std::string>();
 		QString catIds;
 		for(uint16_t i=0;i<catSize;i++)
 		{
@@ -545,7 +548,7 @@ void TableEditor::createMonthReport()
 			catName=catName.fromUtf8(catName.toLatin1());
 			double sum=0;
 			reportText.append("<h4>"+catName+"</h4>");
-			std::vector<std::string> *t=new std::vector<std::string>();
+			auto *t=new std::vector<std::string>();
 			QString query="SELECT id, name, val, date, descr# FROM base WHERE category=\""+catName+"\" AND strftime(\"%m %Y\", date)=\""+date.toString("MM yyyy")+"\"";
 			if(shop==1)
 				query.replace(QString("#"), QString(", shop"));
@@ -573,8 +576,8 @@ void TableEditor::createMonthReport()
 					if(k==2)
 					{
 						double *convertResult=new double();
-						std::vector<std::string> *curr=new std::vector<std::string>();
-						std::vector<std::string> *currentCurrencyId=new std::vector<std::string>();
+						auto *curr=new std::vector<std::string>();
+						auto *currentCurrencyId=new std::vector<std::string>();
 						client->executeQuery("SELECT currencyId FROM expenses WHERE id="+cells.at(0).toLatin1(), *currentCurrencyId);
 
 						curr->push_back(cells.at(k).toStdString());
@@ -608,9 +611,9 @@ void TableEditor::createMonthReport()
 	delete dialog;
 }
 
-void TableEditor::convertTo(double *result, std::vector<std::string> *vals, uint16_t to)
+void TableEditor::convertTo(double *result, auto *vals, uint16_t to)
 {
-	std::vector<std::string> *queryRes=new std::vector<std::string>();
+	auto *queryRes=new std::vector<std::string>();
 	client->executeQuery("SELECT ind FROM currency", *queryRes);
 	double indexes[queryRes->size()];
 	double *currs=new double[vals->size()];
@@ -643,7 +646,7 @@ void TableEditor::convertTo(double *result, std::vector<std::string> *vals, uint
 void TableEditor::createYearReport()
 {
 	QStringList *params=new QStringList();
-	std::vector<std::string> *cat=new std::vector<std::string>();
+	auto *cat=new std::vector<std::string>();
 	client->executeQuery("SELECT name FROM categories", *cat);
 	for(uint8_t i=0;i<cat->size();i++)
 	{

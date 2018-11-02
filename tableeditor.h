@@ -25,9 +25,9 @@ private:
 						 "AND shopId=shops.id";
 	QList <uint32_t> *ids;
 	uint8_t tableIndex;
-	void reloadTable(std::vector<std::string> *vec);
+	void reloadTable(auto *vec);
 	uint16_t getSelectedId();
-	void convertTo(double *result, std::vector<std::string> *vals, uint16_t to);
+	void convertTo(double *result, auto *vals, uint16_t to);
 
 public slots:
 	void executeQuery(QString *query);

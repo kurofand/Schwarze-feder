@@ -93,7 +93,7 @@ void InsertDialog::selectTable(int index)
 			ui->gridLayout->addWidget(cbCurrency);
 			SqliteClient *client=new SqliteClient("SchwarzeFeder.db");
 			client->connect();
-			std::vector<std::string> *vec=new std::vector<std::string>();
+			auto *vec=new std::vector<std::string>();
 			client->executeQuery("SELECT name FROM currency", *vec);
 			QStringList list;
 			for(uint16_t i=0;i<vec->size();i++)
@@ -247,7 +247,7 @@ void InsertDialog::selectCategory(QString text)
 			client=new MySQLClient(params[0].c_str(), params[1].c_str(), params[2].c_str(), params[3].c_str());*/
 		client=new SqliteClient("SchwarzeFeder.db");
 			client->connect();
-			std::vector<std::string> *vec=new std::vector<std::string>();
+			auto *vec=new std::vector<std::string>();
 			QString query="SELECT shopAvailable FROM categories WHERE name=\""+text+"\"";
 			client->executeQuery(query.toUtf8(), *vec);
 			if(vec->at(0)=="1")

@@ -7,7 +7,7 @@ FilterDialog::FilterDialog(QWidget *parent, uint8_t tableIndex) :
 {
 	ui->setupUi(this);
 	tIndex=tableIndex;
-	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	//ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
 }
 
@@ -59,8 +59,8 @@ void FilterDialog::on_pbAdd_clicked()
 	}
 	}
 	connect(cbCols.back(), SIGNAL(currentIndexChanged(int)), this, SLOT(selectCol(int)));
-	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
-	filterCount++;
+	/*ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+	filterCount++;*/
 }
 //пока так, потом править
 void FilterDialog::deleteFilter()
@@ -124,8 +124,8 @@ void FilterDialog::deleteFilter()
 			delete filterLayouts.at(i);
 			filterLayouts.removeAt(i);
 		}
-	if(--filterCount==0)
-		ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	/*if(--filterCount==0)
+		ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);*/
 }
 
 void FilterDialog::selectCol(int index)
@@ -288,7 +288,9 @@ QString FilterDialog::returnFilterString()
 						resArr.append("shop");
 				//res=res+"name";
 					else
-						resArr.append("expenses.name");
+						//resArr.append("expenses.name");
+						//до этого брал в where был expenses.name видимо ошибка, но на всякий случай оставил в комментах
+						resArr.append("base.name");
 				for(uint8_t j=0;j<innerLayouts.at(i)->count();j++)
 				{
 					child=innerLayouts.at(i)->takeAt(j);
@@ -407,8 +409,9 @@ QString FilterDialog::returnFilterString()
 		}
 		}
 	}
-
-	res+=resArr.at(0);
+	//для случаев если юзер фильтр не создал, но ткнул Ок
+	if(resArr.size()>0)
+		res+=resArr.at(0);
 	for(uint8_t i=0;i<logicArr.size();i++)
 		res=res+logicArr.at(i)+resArr.at(i+1);
 	//в случае базовой таблицы обязательно вносить в запрос проверку соответствия с другими таблицами

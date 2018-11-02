@@ -34,7 +34,7 @@ EditDialog::EditDialog(QWidget *parent, uint8_t tabIndex, const char* record) :
 		ui->formLayout->addRow("Date", deDate);
 		cbCategory=new QComboBox();
 
-		std::vector<std::string> *vec=new std::vector<std::string>();
+		auto *vec=new std::vector<std::string>();
 		client->connect();
 		client->executeQuery("SELECT name FROM categories", *vec);
 		QStringList categories;
@@ -93,7 +93,7 @@ void EditDialog::createCbShop()
 	QStringList list;
 	SqliteClient *client=new SqliteClient("SchwarzeFeder.db");
 	client->connect();
-	std::vector<std::string> *vec=new std::vector<std::string>();
+	auto *vec=new std::vector<std::string>();
 	client->executeQuery("SELECT name FROM shops", *vec);
 	for(uint16_t i=0;i<vec->size();i++)
 		list.append(QString::fromUtf8(QString::fromStdString(vec->at(i)).toLatin1()));
@@ -108,7 +108,7 @@ void EditDialog::selectCategory(int index)
 {
 	SqliteClient *client=new SqliteClient("SchwarzeFeder.db");
 	client->connect();
-	std::vector<std::string> *vec=new std::vector<std::string>();
+	auto *vec=new std::vector<std::string>();
 	QString query="SELECT shopAvailable FROM categories WHERE id="+QString::number(index+1);
 	client->executeQuery(query.toUtf8(), *vec);
 	if(vec->at(0)=="1")
